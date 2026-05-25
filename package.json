@@ -7,7 +7,7 @@
     "build": "nx run-many --target=build",
     "test": "nx run-many --target=test",
     "lint": "nx run-many --target=lint",
-HH    "typecheck": "pnpm -r run typecheck --if-present",
+    "typecheck": "pnpm -r run typecheck --if-present",
     "db:generate": "nx run db:generate",
     "db:migrate": "nx run db:migrate",
     "db:seed": "nx run db:seed",
