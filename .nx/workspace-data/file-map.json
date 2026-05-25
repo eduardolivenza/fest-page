@@ -37,40 +37,156 @@
   "fileMap": {
     "nonProjectFiles": [
       {
-        "file": "resources/FEST    (1).JPG",
-        "hash": "14994183134586055462"
-      },
-      {
-        "file": ".idea/.gitignore",
-        "hash": "2389750024481521079"
-      },
-      {
-        "file": "helm/festpage/templates/web-deployment.yaml",
-        "hash": "17277499039583865193"
-      },
-      {
-        "file": "helm/festpage/Chart.lock",
-        "hash": "8966851330713484293"
-      },
-      {
-        "file": ".claude/commands/arch-frontend.md",
-        "hash": "14175623257747221779"
-      },
-      {
-        "file": "resources/FEST    (28).JPG",
-        "hash": "5239560554172836362"
-      },
-      {
-        "file": "resources/9995 - PLAFO PARELLA FEST ORI.pdf",
-        "hash": "2340099827865817188"
+        "file": "resources/Fest-Descans-1.jpg",
+        "hash": "6068996436358250171"
       },
       {
         "file": ".gitignore",
         "hash": "14611614132679651850"
       },
       {
+        "file": "helm/festpage/templates/api-deployment.yaml",
+        "hash": "11194130518154308562"
+      },
+      {
+        "file": "resources/9995 - PLAFO PARELLA FEST ORI.pdf",
+        "hash": "2340099827865817188"
+      },
+      {
+        "file": "resources/IMG_8445.jpg",
+        "hash": "16441553570051733049"
+      },
+      {
+        "file": ".prettierrc",
+        "hash": "11450766685848108030"
+      },
+      {
+        "file": "resources/IMG_8441.jpg",
+        "hash": "8043248181822855552"
+      },
+      {
+        "file": ".claude/commands/arch-frontend.md",
+        "hash": "14175623257747221779"
+      },
+      {
+        "file": ".claude/commands/arch.md",
+        "hash": "8078396052619572931"
+      },
+      {
+        "file": "helm/festpage/templates/_helpers.tpl",
+        "hash": "12185991086463668159"
+      },
+      {
+        "file": "resources/IMG_8443.jpg",
+        "hash": "2075543716780116480"
+      },
+      {
+        "file": "pnpm-workspace.yaml",
+        "hash": "2373171212127886927"
+      },
+      {
+        "file": ".idea/nx-angular-config.xml",
+        "hash": "11747644467998611843"
+      },
+      {
+        "file": ".claude/commands/arch-api.md",
+        "hash": "13136211638639581144"
+      },
+      {
+        "file": "helm/festpage/charts/postgresql-18.6.7.tgz",
+        "hash": "13799104010757314788"
+      },
+      {
         "file": "resources/9995 - PLAFO BEBE FEST ORI.pdf",
         "hash": "10921061216141720890"
+      },
+      {
+        "file": "resources/FEST    (5).JPG",
+        "hash": "12246637460872912045"
+      },
+      {
+        "file": "resources/FEST    (1).JPG",
+        "hash": "14994183134586055462"
+      },
+      {
+        "file": "helm/festpage/templates/namespace.yaml",
+        "hash": "1541300686664142842"
+      },
+      {
+        "file": ".idea/vcs.xml",
+        "hash": "14721619479974801327"
+      },
+      {
+        "file": "nx.json",
+        "hash": "17315033211525547141"
+      },
+      {
+        "file": "helm/festpage/Chart.lock",
+        "hash": "8966851330713484293"
+      },
+      {
+        "file": ".idea/.gitignore",
+        "hash": "2389750024481521079"
+      },
+      {
+        "file": "resources/Logo_fest_color.pdf:Zone.Identifier",
+        "hash": "6175566146444302201"
+      },
+      {
+        "file": "helm/festpage/values.yaml",
+        "hash": "3901804221317005119"
+      },
+      {
+        "file": "resources/IMG_8437.jpg",
+        "hash": "2574695161588791511"
+      },
+      {
+        "file": "pnpm-lock.yaml",
+        "hash": "13424342578118338244"
+      },
+      {
+        "file": "tsconfig.base.json",
+        "hash": "8601839740680404111"
+      },
+      {
+        "file": "helm/festpage/templates/web-deployment.yaml",
+        "hash": "17277499039583865193"
+      },
+      {
+        "file": "helm/festpage/templates/ingress.yaml",
+        "hash": "7885857111599244169"
+      },
+      {
+        "file": "helm/festpage/templates/secrets.yaml",
+        "hash": "11167770070266730594"
+      },
+      {
+        "file": "package.json",
+        "hash": "9063590703224940128"
+      },
+      {
+        "file": ".claude/settings.local.json",
+        "hash": "2347564092331638520"
+      },
+      {
+        "file": "resources/9995 - PLAFO DONA FEST ORI.pdf",
+        "hash": "1349704841569827085"
+      },
+      {
+        "file": "resources/Logo_fest_color.pdf",
+        "hash": "8798384219829297218"
+      },
+      {
+        "file": "helm/festpage/templates/admin-deployment.yaml",
+        "hash": "7685276957557770841"
+      },
+      {
+        "file": ".github/workflows/ci.yml",
+        "hash": "4429662103788912091"
+      },
+      {
+        "file": "docker-compose.yml",
+        "hash": "16178349612362792283"
       },
       {
         "file": "resources/FEST    (8).JPG",
@@ -81,132 +197,20 @@
         "hash": "16858152856984391625"
       },
       {
-        "file": "resources/IMG_8443.jpg",
-        "hash": "2075543716780116480"
+        "file": ".env.example",
+        "hash": "15263040351653699243"
       },
       {
-        "file": "resources/Fest-Descans-1.jpg",
-        "hash": "6068996436358250171"
+        "file": "resources/FEST    (28).JPG",
+        "hash": "5239560554172836362"
       },
       {
         "file": "resources/IMG_8438.jpg",
         "hash": "13164390810070714724"
       },
       {
-        "file": ".idea/vcs.xml",
-        "hash": "14721619479974801327"
-      },
-      {
-        "file": "resources/9995 - PLAFO DONA FEST ORI.pdf",
-        "hash": "1349704841569827085"
-      },
-      {
-        "file": ".env.example",
-        "hash": "15263040351653699243"
-      },
-      {
-        "file": "helm/festpage/values.yaml",
-        "hash": "3901804221317005119"
-      },
-      {
-        "file": "resources/FEST    (5).JPG",
-        "hash": "12246637460872912045"
-      },
-      {
-        "file": "resources/Logo_fest_color.pdf:Zone.Identifier",
-        "hash": "6175566146444302201"
-      },
-      {
-        "file": ".claude/commands/arch.md",
-        "hash": "8078396052619572931"
-      },
-      {
-        "file": "resources/IMG_8441.jpg",
-        "hash": "8043248181822855552"
-      },
-      {
-        "file": ".claude/commands/arch-api.md",
-        "hash": "13136211638639581144"
-      },
-      {
-        "file": "helm/festpage/templates/admin-deployment.yaml",
-        "hash": "7685276957557770841"
-      },
-      {
-        "file": "helm/festpage/templates/api-deployment.yaml",
-        "hash": "11194130518154308562"
-      },
-      {
-        "file": "docker-compose.yml",
-        "hash": "16178349612362792283"
-      },
-      {
-        "file": ".prettierrc",
-        "hash": "11450766685848108030"
-      },
-      {
-        "file": "helm/festpage/templates/secrets.yaml",
-        "hash": "11167770070266730594"
-      },
-      {
-        "file": "nx.json",
-        "hash": "17315033211525547141"
-      },
-      {
-        "file": "resources/Logo_fest_color.pdf",
-        "hash": "8798384219829297218"
-      },
-      {
-        "file": "helm/festpage/templates/_helpers.tpl",
-        "hash": "12185991086463668159"
-      },
-      {
-        "file": ".claude/settings.local.json",
-        "hash": "7950540770806173301"
-      },
-      {
-        "file": "resources/IMG_8437.jpg",
-        "hash": "2574695161588791511"
-      },
-      {
-        "file": "helm/festpage/charts/postgresql-18.6.7.tgz",
-        "hash": "13799104010757314788"
-      },
-      {
-        "file": "resources/IMG_8445.jpg",
-        "hash": "16441553570051733049"
-      },
-      {
         "file": "helm/festpage/templates/NOTES.txt",
         "hash": "13997421737551207111"
-      },
-      {
-        "file": ".idea/nx-angular-config.xml",
-        "hash": "11747644467998611843"
-      },
-      {
-        "file": "helm/festpage/templates/namespace.yaml",
-        "hash": "1541300686664142842"
-      },
-      {
-        "file": "tsconfig.base.json",
-        "hash": "8601839740680404111"
-      },
-      {
-        "file": "package.json",
-        "hash": "9063590703224940128"
-      },
-      {
-        "file": "pnpm-workspace.yaml",
-        "hash": "2373171212127886927"
-      },
-      {
-        "file": "pnpm-lock.yaml",
-        "hash": "13424342578118338244"
-      },
-      {
-        "file": "helm/festpage/templates/ingress.yaml",
-        "hash": "7885857111599244169"
       }
     ],
     "projectFileMap": {
