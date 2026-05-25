@@ -15,6 +15,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 FROM base AS builder
 WORKDIR /repo
 COPY --from=deps /repo/node_modules ./node_modules
+COPY package.json .
 COPY packages packages
 COPY apps/admin apps/admin
 COPY tsconfig.base.json .

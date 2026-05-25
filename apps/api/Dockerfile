@@ -18,6 +18,7 @@ COPY --from=deps /repo/node_modules ./node_modules
 COPY --from=deps /repo/packages/types/node_modules packages/types/node_modules
 COPY --from=deps /repo/packages/db/node_modules packages/db/node_modules
 COPY --from=deps /repo/apps/api/node_modules apps/api/node_modules
+COPY package.json .
 COPY packages/types packages/types
 COPY packages/db packages/db
 COPY apps/api apps/api
