@@ -8,6 +8,7 @@ WORKDIR /repo
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
 COPY packages/types/package.json packages/types/
 COPY packages/db/package.json packages/db/
+COPY packages/db/prisma packages/db/prisma
 COPY apps/api/package.json apps/api/
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
