@@ -1,0 +1,123 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { Button } from '@festpage/ui';
+import { apiFetch } from '@/lib/api';
+import { SizesEditor, SIZED_CATEGORIES } from '@/components/SizesEditor';
+
+export default function NewProductPage() {
+  const router = useRouter();
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [category, setCategory] = useState('BED');
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+
+    const fd = new FormData(e.currentTarget);
+    const rawSizes = fd.get('sizes') as string;
+    const sizes = SIZED_CATEGORIES.includes(category) ? JSON.parse(rawSizes) : [];
+
+    const body = {
+      name: fd.get('name') as string,
+      slug: fd.get('slug') as string,
+      description: (fd.get('description') as string) || undefined,
+      price: parseFloat(fd.get('price') as string),
+      category,
+      featured: fd.get('featured') === 'on',
+      sizes,
+    };
+
+    try {
+      await apiFetch('/api/admin/products', { method: 'POST', body: JSON.stringify(body) });
+      router.push('/dashboard/products');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al guardar');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const slugInput = document.getElementById('slug') as HTMLInputElement;
+    if (slugInput) {
+      slugInput.value = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    }
+  }
+
+  return (
+    <div className="mx-auto max-w-xl">
+      <h1 className="font-display text-3xl font-bold text-brand-blue-900">Nuevo producto</h1>
+
+      <form onSubmit={handleSubmit} className="mt-8 space-y-5 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+        <div>
+          <label className="block text-sm font-medium text-gray-700" htmlFor="name">Nombre</label>
+          <input
+            id="name" name="name" type="text" required onChange={handleNameChange}
+            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-none focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700" htmlFor="slug">Slug (URL)</label>
+          <input
+            id="slug" name="slug" type="text" required pattern="[a-z0-9-]+"
+            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-none focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700" htmlFor="category">Categoría</label>
+          <select
+            id="category" name="category" required
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-none focus:border-brand-blue-500"
+          >
+            <option value="BED">Cama</option>
+            <option value="MATTRESS">Colchón</option>
+            <option value="PILLOW">Almohada</option>
+            <option value="ACCESSORY">Accesorio</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700" htmlFor="price">Precio base (€)</label>
+          <input
+            id="price" name="price" type="number" required step="0.01" min="0"
+            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-none focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700" htmlFor="description">Descripción</label>
+          <textarea
+            id="description" name="description" rows={4}
+            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-none focus:border-brand-blue-500"
+          />
+        </div>
+
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <input type="checkbox" name="featured" className="rounded" />
+          Producto destacado
+        </label>
+
+        {SIZED_CATEGORIES.includes(category) && (
+          <div className="rounded-xl border border-brand-blue-100 bg-brand-blue-50 p-4">
+            <SizesEditor />
+          </div>
+        )}
+
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
+        <div className="flex gap-3">
+          <Button type="submit" loading={saving}>Guardar</Button>
+          <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
+        </div>
+      </form>
+    </div>
+  );
+}

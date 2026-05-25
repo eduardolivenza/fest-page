@@ -1,0 +1,31 @@
+{
+  "name": "festpage-monorepo",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "nx run-many --target=dev --parallel=3",
+    "build": "nx run-many --target=build",
+    "test": "nx run-many --target=test",
+    "lint": "nx run-many --target=lint",
+    "db:generate": "nx run db:generate",
+    "db:migrate": "nx run db:migrate",
+    "db:seed": "nx run db:seed",
+    "db:studio": "nx run db:studio"
+  },
+  "devDependencies": {
+    "@nx/eslint": "^20.0.0",
+    "@nx/js": "^20.0.0",
+    "@nx/next": "^20.0.0",
+    "@nx/node": "^20.0.0",
+    "@nx/react": "^20.0.0",
+    "@types/node": "^22.0.0",
+    "nx": "^20.0.0",
+    "prettier": "^3.4.0",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

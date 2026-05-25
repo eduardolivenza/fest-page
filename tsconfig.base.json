@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@festpage/types": ["packages/types/src/index.ts"],
+      "@festpage/db": ["packages/db/src/index.ts"],
+      "@festpage/ui": ["packages/ui/src/index.ts"],
+      "@festpage/config/*": ["packages/config/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "**/node_modules"]
+}
