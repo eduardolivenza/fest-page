@@ -1,6 +1,7 @@
 'use client';
 
 import type { Product } from '@festpage/types';
+import { Badge } from '@festpage/ui';
 import { useT } from '@/i18n';
 
 export function ProductDetail({ product }: { product: Product }) {
