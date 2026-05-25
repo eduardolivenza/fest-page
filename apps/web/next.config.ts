@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next';
 
 const config: NextConfig = {
+  output: 'standalone',
   transpilePackages: ['@festpage/ui', '@festpage/types'],
   images: {
     remotePatterns: [{ protocol: 'https', hostname: '**' }],
