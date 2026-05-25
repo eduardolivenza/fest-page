@@ -1,0 +1,92 @@
+# ── Global ─────────────────────────────────────────────────────────────────────
+global:
+  # Prepended to every image repository: "ghcr.io/myorg" → "ghcr.io/myorg/festpage/web:tag"
+  imageRegistry: ""
+  imagePullSecrets: []
+
+# Set to true to let the chart create the namespace (alternative: helm install --create-namespace)
+createNamespace: false
+
+# ── Secrets ─────────────────────────────────────────────────────────────────────
+# Never commit real values here. Pass at install time:
+#   helm install festpage ./helm/festpage \
+#     --set secrets.jwtSecret=<long-random-string> \
+#     --set postgresql.auth.password=<db-password>
+secrets:
+  jwtSecret: ""
+
+# ── Web (Next.js storefront) ────────────────────────────────────────────────────
+web:
+  image:
+    repository: festpage/web
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicas: 2
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+# ── Admin (Next.js back-office) ─────────────────────────────────────────────────
+admin:
+  image:
+    repository: festpage/admin
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicas: 1
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 50m
+    limits:
+      memory: 256Mi
+      cpu: 250m
+
+# ── API (Fastify) ────────────────────────────────────────────────────────────────
+api:
+  image:
+    repository: festpage/api
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicas: 2
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+# ── Ingress ──────────────────────────────────────────────────────────────────────
+ingress:
+  className: nginx
+  hosts:
+    web: festpage.com
+    api: api.festpage.com
+    admin: admin.festpage.com
+  tls:
+    enabled: true
+    secretName: festpage-tls
+    clusterIssuer: letsencrypt-prod
+
+# ── PostgreSQL (bitnami/postgresql subchart) ─────────────────────────────────────
+# Full bitnami values reference: https://github.com/bitnami/charts/tree/main/bitnami/postgresql
+postgresql:
+  enabled: true
+  auth:
+    database: festpage
+    username: festpage
+    password: ""    # --set postgresql.auth.password=<value>
+  primary:
+    persistence:
+      size: 5Gi
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 500m

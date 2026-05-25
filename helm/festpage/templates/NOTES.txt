@@ -1,0 +1,18 @@
+Fest Descans has been deployed!
+
+URLs:
+  Storefront:  https://{{ .Values.ingress.hosts.web }}
+  Admin panel: https://{{ .Values.ingress.hosts.admin }}
+  API:         https://{{ .Values.ingress.hosts.api }}
+
+After first install, run the database seed:
+  kubectl exec -n {{ .Release.Namespace }} \
+    deploy/{{ .Release.Name }}-api -- \
+    pnpm --filter @festpage/db prisma db seed
+
+To upgrade with a new image tag:
+  helm upgrade {{ .Release.Name }} ./helm/festpage \
+    --reuse-values \
+    --set web.image.tag=<new-tag> \
+    --set admin.image.tag=<new-tag> \
+    --set api.image.tag=<new-tag>
