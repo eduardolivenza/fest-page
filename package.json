@@ -7,6 +7,7 @@
     "build": "nx run-many --target=build",
     "test": "nx run-many --target=test",
     "lint": "nx run-many --target=lint",
+    "typecheck": "nx run-many --target=typecheck",
     "db:generate": "nx run db:generate",
     "db:migrate": "nx run db:migrate",
     "db:seed": "nx run db:seed",

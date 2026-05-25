@@ -26,9 +26,9 @@ env:
   IMAGE_BASE: ghcr.io/${{ github.repository_owner }}/festpage
 
 jobs:
-  # ─── Lint (PRs + main) ──────────────────────────────────────────────────────
+  # ─── Type check (PRs + main) ────────────────────────────────────────────────
   lint:
-    name: Lint
+    name: Type check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +43,7 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
+      - run: pnpm typecheck
 
   # ─── Auto-tag (main only) ───────────────────────────────────────────────────
   version:
