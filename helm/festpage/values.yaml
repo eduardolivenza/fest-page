@@ -2,9 +2,7 @@
 global:
   imageRegistry: ""
   imagePullSecrets: []
-
 createNamespace: false
-
 # ── Secrets ─────────────────────────────────────────────────────────────────────
 # secrets.create=true  → Helm creates the K8s Secret (use for manual helm install)
 # secrets.create=false → Secret must exist already (use when deploying via ArgoCD)
@@ -14,12 +12,11 @@ createNamespace: false
 secrets:
   create: true
   jwtSecret: ""
-
 # ── Web (Next.js storefront) ────────────────────────────────────────────────────
 web:
   image:
     repository: festpage/web
-    tag: latest
+    tag: v0.0.9
     pullPolicy: IfNotPresent
   replicas: 2
   resources:
@@ -29,12 +26,11 @@ web:
     limits:
       memory: 512Mi
       cpu: 500m
-
 # ── Admin (Next.js back-office) ─────────────────────────────────────────────────
 admin:
   image:
     repository: festpage/admin
-    tag: latest
+    tag: v0.0.9
     pullPolicy: IfNotPresent
   replicas: 1
   resources:
@@ -44,12 +40,11 @@ admin:
     limits:
       memory: 256Mi
       cpu: 250m
-
 # ── API (Fastify) ────────────────────────────────────────────────────────────────
 api:
   image:
     repository: festpage/api
-    tag: latest
+    tag: v0.0.9
     pullPolicy: IfNotPresent
   replicas: 2
   resources:
@@ -59,7 +54,6 @@ api:
     limits:
       memory: 512Mi
       cpu: 500m
-
 # ── Ingress ──────────────────────────────────────────────────────────────────────
 ingress:
   className: nginx
@@ -71,7 +65,6 @@ ingress:
     enabled: true
     secretName: festpage-tls
     clusterIssuer: letsencrypt-prod
-
 # ── PostgreSQL (bitnami/postgresql subchart) ─────────────────────────────────────
 postgresql:
   enabled: true
