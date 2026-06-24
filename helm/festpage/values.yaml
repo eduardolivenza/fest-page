@@ -1,18 +1,18 @@
 # ── Global ─────────────────────────────────────────────────────────────────────
 global:
-  # Prepended to every image repository: "ghcr.io/myorg" → "ghcr.io/myorg/festpage/web:tag"
   imageRegistry: ""
   imagePullSecrets: []
 
-# Set to true to let the chart create the namespace (alternative: helm install --create-namespace)
 createNamespace: false
 
 # ── Secrets ─────────────────────────────────────────────────────────────────────
-# Never commit real values here. Pass at install time:
-#   helm install festpage ./helm/festpage \
-#     --set secrets.jwtSecret=<long-random-string> \
-#     --set postgresql.auth.password=<db-password>
+# secrets.create=true  → Helm creates the K8s Secret (use for manual helm install)
+# secrets.create=false → Secret must exist already (use when deploying via ArgoCD)
+#
+# When true, pass real values at install time — never commit them here:
+#   --set secrets.jwtSecret=<value> --set postgresql.auth.password=<value>
 secrets:
+  create: true
   jwtSecret: ""
 
 # ── Web (Next.js storefront) ────────────────────────────────────────────────────
@@ -73,13 +73,12 @@ ingress:
     clusterIssuer: letsencrypt-prod
 
 # ── PostgreSQL (bitnami/postgresql subchart) ─────────────────────────────────────
-# Full bitnami values reference: https://github.com/bitnami/charts/tree/main/bitnami/postgresql
 postgresql:
   enabled: true
   auth:
     database: festpage
     username: festpage
-    password: ""    # --set postgresql.auth.password=<value>
+    password: ""
   primary:
     persistence:
       size: 5Gi

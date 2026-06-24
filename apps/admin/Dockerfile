@@ -5,7 +5,7 @@ RUN corepack enable
 
 FROM base AS deps
 WORKDIR /repo
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY packages/types/package.json packages/types/
 COPY packages/ui/package.json packages/ui/
 COPY packages/config/package.json packages/config/
@@ -32,6 +32,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /repo/apps/admin/.next/standalone ./
 COPY --from=builder /repo/apps/admin/.next/static ./.next/static
+# FIX: public folder was missing — logos and static assets weren't served
+COPY --from=builder /repo/apps/admin/public ./public
 RUN addgroup -g 1001 -S nodejs && adduser -S appuser -u 1001
 USER appuser
 EXPOSE 3002

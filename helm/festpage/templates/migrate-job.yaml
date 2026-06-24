@@ -1,0 +1,62 @@
+# Helm pre-install / pre-upgrade hook that runs Prisma migrations.
+#
+# Runs BEFORE the API deployment is updated, so the schema is always
+# up to date before new pods start. If the migration fails, Helm
+# (and ArgoCD) will mark the sync as failed and the old pods keep running.
+#
+# The job reuses the API image — it already contains:
+#   - /repo/node_modules/.bin/prisma  (from the deps stage)
+#   - /repo/packages/db/prisma/       (schema + migration files)
+apiVersion: batch/v1
+kind: Job
+metadata:
+  # Revision suffix ensures a new Job is created on every upgrade
+  name: {{ .Release.Name }}-migrate-{{ .Release.Revision }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "festpage.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migrate
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-1"
+    # Clean up the previous successful Job before creating a new one
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  # Auto-delete the Job pod 5 minutes after completion
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "festpage.labels" . | nindent 8 }}
+        app.kubernetes.io/component: migrate
+    spec:
+      restartPolicy: OnFailure
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: migrate
+          image: {{ include "festpage.image" (dict "registry" .Values.global.imageRegistry "repo" .Values.api.image.repository "tag" .Values.api.image.tag) }}
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+          workingDir: /repo
+          command:
+            - node_modules/.bin/prisma
+            - migrate
+            - deploy
+            - --schema
+            - packages/db/prisma/schema.prisma
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-api
+                  key: DATABASE_URL
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 256Mi
+              cpu: 200m

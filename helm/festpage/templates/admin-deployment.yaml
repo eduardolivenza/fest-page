@@ -52,5 +52,12 @@ spec:
               port: 3002
             initialDelaySeconds: 15
             periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /login
+              port: 3002
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 3
           resources:
             {{- toYaml .Values.admin.resources | nindent 12 }}

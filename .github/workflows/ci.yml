@@ -1,25 +1,24 @@
 name: CI/CD
 
-# Runs on every push to main.
-# Commit message prefixes control the version bump (conventional commits):
-#   fix: anything  →  patch  (1.0.X)
-#   feat: anything →  minor  (1.X.0)
-#   feat!: / BREAKING CHANGE  →  major  (X.0.0)
-#   anything else  →  patch  (default)
+# Flow:
+#   1. lint      — type-check every push / PR
+#   2. version   — bump semver tag on main (conventional commits)
+#   3. build     — build & push 3 Docker images to ghcr.io (parallel)
+#   4. update-gitops — update image tags in helm/festpage/values.yaml
+#                      and commit back → ArgoCD picks up the change and deploys
 #
-# Required repository secrets (Settings → Secrets and variables → Secrets):
-#   JWT_SECRET     — Fastify JWT signing secret
-#   DB_PASSWORD    — PostgreSQL password
-#   KUBECONFIG_B64 — base64-encoded kubeconfig  (`base64 ~/.kube/config`)
+# Required repository secrets (Settings → Secrets → Actions):
+#   JWT_SECRET   — only needed if you ever run helm manually; ArgoCD uses a pre-created K8s secret
+#   DB_PASSWORD  — same as above
 #
-# Optional repository variable (Settings → Secrets and variables → Variables):
+# Optional repository variable:
 #   NEXT_PUBLIC_API_URL — defaults to https://api.festpage.com
 
 on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]   # lint only on PRs
+    branches: [main]
 
 env:
   REGISTRY: ghcr.io
@@ -95,78 +94,50 @@ jobs:
           tags: |
             ${{ env.IMAGE_BASE }}/${{ matrix.app }}:${{ needs.version.outputs.tag }}
             ${{ env.IMAGE_BASE }}/${{ matrix.app }}:latest
-          # NEXT_PUBLIC_API_URL is only used by web + admin Dockerfiles; api ignores it.
           build-args: |
             NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL || 'https://api.festpage.com' }}
           cache-from: type=gha,scope=${{ matrix.app }}
           cache-to: type=gha,mode=max,scope=${{ matrix.app }}
 
-  # ─── Package & push Helm chart to OCI registry ──────────────────────────────
-  chart:
-    name: Package Helm chart
+  # ─── Update GitOps values → ArgoCD deploys automatically ────────────────────
+  #
+  # This replaces the old push-based `helm upgrade` job.
+  # CI writes the new image tag to helm/festpage/values.yaml and commits back.
+  # ArgoCD detects the commit (via webhook or polling) and syncs the cluster.
+  # The commit uses [skip ci] so it doesn't trigger another pipeline run.
+  update-gitops:
+    name: Update image tags
     needs: [version, build]
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      packages: write
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Use default GITHUB_TOKEN — no extra secret needed
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # Fetch full history so the tag commit is reachable
+          fetch-depth: 0
 
-      - uses: azure/setup-helm@v4
-
-      - name: Login to GHCR (OCI)
+      - name: Install yq
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | \
-            helm registry login ghcr.io --username "${{ github.actor }}" --password-stdin
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
 
-      - name: Add Helm repos
-        run: helm repo add bitnami https://charts.bitnami.com/bitnami
-
-      - name: Package and push
+      - name: Bump image tags in values.yaml
         run: |
-          helm dep build helm/festpage
-          helm package helm/festpage \
-            --version "${{ needs.version.outputs.version }}" \
-            --app-version "${{ needs.version.outputs.tag }}"
-          helm push "festpage-${{ needs.version.outputs.version }}.tgz" \
-            oci://ghcr.io/${{ github.repository_owner }}/charts
+          TAG="${{ needs.version.outputs.tag }}"
+          yq -i ".web.image.tag   = \"${TAG}\"" helm/festpage/values.yaml
+          yq -i ".admin.image.tag = \"${TAG}\"" helm/festpage/values.yaml
+          yq -i ".api.image.tag   = \"${TAG}\"" helm/festpage/values.yaml
 
-  # ─── Deploy ─────────────────────────────────────────────────────────────────
-  deploy:
-    name: Deploy
-    needs: [version, chart]
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://festpage.com
-    steps:
-      - uses: azure/setup-helm@v4
-
-      - name: Login to GHCR (OCI)
+      - name: Commit and push
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | \
-            helm registry login ghcr.io --username "${{ github.actor }}" --password-stdin
-
-      - name: Configure kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > ~/.kube/config
-          chmod 600 ~/.kube/config
-
-      - name: Helm upgrade
-        run: |
-          helm upgrade --install festpage \
-            oci://ghcr.io/${{ github.repository_owner }}/charts/festpage \
-            --version "${{ needs.version.outputs.version }}" \
-            --namespace festpage \
-            --create-namespace \
-            --set web.image.repository="${{ env.IMAGE_BASE }}/web" \
-            --set web.image.tag="${{ needs.version.outputs.tag }}" \
-            --set admin.image.repository="${{ env.IMAGE_BASE }}/admin" \
-            --set admin.image.tag="${{ needs.version.outputs.tag }}" \
-            --set api.image.repository="${{ env.IMAGE_BASE }}/api" \
-            --set api.image.tag="${{ needs.version.outputs.tag }}" \
-            --set secrets.jwtSecret="${{ secrets.JWT_SECRET }}" \
-            --set postgresql.auth.password="${{ secrets.DB_PASSWORD }}" \
-            --atomic \
-            --timeout 5m
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add helm/festpage/values.yaml
+          # Only commit if the file actually changed (idempotent)
+          git diff --staged --quiet && echo "No changes to commit" && exit 0
+          git commit -m "ci: update images to ${{ needs.version.outputs.tag }} [skip ci]"
+          git push

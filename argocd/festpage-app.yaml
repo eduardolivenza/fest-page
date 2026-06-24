@@ -1,0 +1,80 @@
+# ArgoCD Application for festpage
+#
+# Prerequisites — run once manually before applying this:
+#
+#   1. Add this repo to ArgoCD:
+#      argocd repo add https://github.com/eduardolivenza/fest-page \
+#        --username <your-github-user> \
+#        --password <github-personal-access-token>
+#
+#   2. Create the namespace and secrets (ArgoCD won't manage these):
+#      kubectl create namespace festpage
+#
+#      kubectl create secret generic festpage-api \
+#        --from-literal=JWT_SECRET=<long-random-string> \
+#        --from-literal=DATABASE_URL="postgresql://festpage:<db-password>@festpage-postgresql:5432/festpage" \
+#        -n festpage
+#
+#      # So Kubernetes can pull images from ghcr.io:
+#      kubectl create secret docker-registry ghcr-credentials \
+#        --docker-server=ghcr.io \
+#        --docker-username=<github-user> \
+#        --docker-password=<github-personal-access-token> \
+#        -n festpage
+#
+#   3. Apply this file:
+#      kubectl apply -f argocd/festpage-app.yaml
+#
+# After this, every `git push` to main will:
+#   CI builds images → updates values.yaml → ArgoCD syncs → K3s deploys
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: festpage
+  namespace: argocd
+  # Ensures child resources are deleted when this Application is deleted
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    # Tells ArgoCD to not touch the festpage-api secret (managed manually above)
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/eduardolivenza/fest-page
+    targetRevision: HEAD
+    path: helm/festpage
+    helm:
+      valueFiles:
+        - values.yaml
+      # Secrets are NOT passed here — they live in the pre-created K8s secret above.
+      # Tell Helm not to create the secret (uses the existing one instead).
+      parameters:
+        - name: secrets.create
+          value: "false"
+        # imagePullSecrets reference created above
+        - name: global.imagePullSecrets[0].name
+          value: ghcr-credentials
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: festpage
+
+  syncPolicy:
+    automated:
+      prune: true       # remove resources deleted from Git
+      selfHeal: true    # revert manual cluster changes
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+
+  # Don't let ArgoCD overwrite the manually-managed secret
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: festpage-api
+      jsonPointers:
+        - /data
