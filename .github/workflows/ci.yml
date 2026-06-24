@@ -1,16 +1,13 @@
 name: CI/CD
 
 # Flow:
-#   1. lint      — type-check every push / PR
-#   2. version   — bump semver tag on main (conventional commits)
-#   3. build     — build & push 3 Docker images to ghcr.io (parallel)
-#   4. update-gitops — update image tags in helm/festpage/values.yaml
-#                      and commit back → ArgoCD picks up the change and deploys
+#   1. lint         — type-check every push / PR
+#   2. version      — bump semver tag on main (conventional commits)
+#   3. build        — build & push 3 Docker images to ghcr.io (parallel)
+#   4. update-gitops — write the new tag into each chart's values.yaml
+#                      and commit back → ArgoCD picks up the change per-chart
 #
-# Required repository secrets (Settings → Secrets → Actions):
-#   JWT_SECRET   — only needed if you ever run helm manually; ArgoCD uses a pre-created K8s secret
-#   DB_PASSWORD  — same as above
-#
+# Required repository secrets:  none beyond the default GITHUB_TOKEN
 # Optional repository variable:
 #   NEXT_PUBLIC_API_URL — defaults to https://api.festpage.com
 
@@ -99,12 +96,15 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.app }}
           cache-to: type=gha,mode=max,scope=${{ matrix.app }}
 
-  # ─── Update GitOps values → ArgoCD deploys automatically ────────────────────
+  # ─── Update each chart's values.yaml → ArgoCD deploys per-chart ─────────────
   #
-  # This replaces the old push-based `helm upgrade` job.
-  # CI writes the new image tag to helm/festpage/values.yaml and commits back.
-  # ArgoCD detects the commit (via webhook or polling) and syncs the cluster.
+  # Each chart (helm/web, helm/admin, helm/api) has its own values.yaml with
+  # its own image.tag. Updating them independently means ArgoCD can sync each
+  # Application on its own, and you can roll back a single chart without
+  # touching the others.
+  #
   # The commit uses [skip ci] so it doesn't trigger another pipeline run.
+  # ArgoCD still picks it up via webhook or polling.
   update-gitops:
     name: Update image tags
     needs: [version, build]
@@ -114,9 +114,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # Use default GITHUB_TOKEN — no extra secret needed
           token: ${{ secrets.GITHUB_TOKEN }}
-          # Fetch full history so the tag commit is reachable
           fetch-depth: 0
 
       - name: Install yq
@@ -125,19 +123,18 @@ jobs:
             https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
 
-      - name: Bump image tags in values.yaml
+      - name: Bump image tag in each chart
         run: |
           TAG="${{ needs.version.outputs.tag }}"
-          yq -i ".web.image.tag   = \"${TAG}\"" helm/festpage/values.yaml
-          yq -i ".admin.image.tag = \"${TAG}\"" helm/festpage/values.yaml
-          yq -i ".api.image.tag   = \"${TAG}\"" helm/festpage/values.yaml
+          yq -i ".image.tag = \"${TAG}\"" helm/web/values.yaml
+          yq -i ".image.tag = \"${TAG}\"" helm/admin/values.yaml
+          yq -i ".image.tag = \"${TAG}\"" helm/api/values.yaml
 
       - name: Commit and push
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add helm/festpage/values.yaml
-          # Only commit if the file actually changed (idempotent)
+          git add helm/web/values.yaml helm/admin/values.yaml helm/api/values.yaml
           git diff --staged --quiet && echo "No changes to commit" && exit 0
           git commit -m "ci: update images to ${{ needs.version.outputs.tag }} [skip ci]"
           git push
