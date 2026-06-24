@@ -1,6 +1,6 @@
 apiVersion: v2
-name: festpage
-description: Fest Descans — public storefront, admin panel, and REST API
+name: festpage-api
+description: Fest Descans — REST API (Fastify) + PostgreSQL
 type: application
 version: 0.1.0
 appVersion: "1.0.0"

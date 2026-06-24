@@ -1,14 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-web
+  name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "festpage.labels" . | nindent 4 }}
-    app.kubernetes.io/component: web
+    app.kubernetes.io/name: festpage-web
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   selector:
-    {{- include "festpage.selectorLabels" (dict "root" . "component" "web") | nindent 4 }}
+    app.kubernetes.io/name: festpage-web
+    app.kubernetes.io/instance: {{ .Release.Name }}
   ports:
     - port: 3000
       targetPort: 3000
@@ -16,20 +17,22 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-web
+  name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "festpage.labels" . | nindent 4 }}
-    app.kubernetes.io/component: web
+    app.kubernetes.io/name: festpage-web
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
-  replicas: {{ .Values.web.replicas }}
+  replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
-      {{- include "festpage.selectorLabels" (dict "root" . "component" "web") | nindent 6 }}
+      app.kubernetes.io/name: festpage-web
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        {{- include "festpage.selectorLabels" (dict "root" . "component" "web") | nindent 8 }}
+        app.kubernetes.io/name: festpage-web
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
@@ -37,15 +40,15 @@ spec:
       {{- end }}
       containers:
         - name: web
-          image: {{ include "festpage.image" (dict "registry" .Values.global.imageRegistry "repo" .Values.web.image.repository "tag" .Values.web.image.tag) }}
-          imagePullPolicy: {{ .Values.web.image.pullPolicy }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 3000
           env:
             - name: NODE_ENV
               value: production
             - name: NEXT_PUBLIC_API_URL
-              value: {{ printf "https://%s" .Values.ingress.hosts.api }}
+              value: {{ .Values.apiUrl | quote }}
           readinessProbe:
             httpGet:
               path: /
@@ -60,4 +63,4 @@ spec:
             periodSeconds: 30
             failureThreshold: 3
           resources:
-            {{- toYaml .Values.web.resources | nindent 12 }}
+            {{- toYaml .Values.resources | nindent 12 }}

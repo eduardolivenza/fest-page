@@ -1,0 +1,89 @@
+# ArgoCD ApplicationSet — festpage
+#
+# Generates 3 independent Applications (web, admin, api) from a single template.
+# Each app tracks its own helm/<app>/ chart, so they can be synced and rolled back
+# independently while still being visible together in the ArgoCD UI.
+#
+# Prerequisites — run once before applying:
+#
+#   kubectl create namespace festpage
+#
+#   # Pull secret for ghcr.io (needed by all 3 apps)
+#   kubectl create secret docker-registry ghcr-credentials \
+#     --docker-server=ghcr.io \
+#     --docker-username=<github-user> \
+#     --docker-password=<github-personal-access-token> \
+#     -n festpage
+#
+#   # API secrets (used by the api chart + migrate job)
+#   kubectl create secret generic festpage-api \
+#     --from-literal=JWT_SECRET=<long-random-string> \
+#     --from-literal=DATABASE_URL="postgresql://festpage:<db-password>@festpage-api-postgresql:5432/festpage" \
+#     -n festpage
+#
+#   # Add repo to ArgoCD
+#   argocd repo add https://github.com/eduardolivenza/fest-page \
+#     --username <github-user> --password <github-pat>
+#
+#   # Apply this file
+#   kubectl apply -f argocd/festpage-appset.yaml
+
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: festpage
+  namespace: argocd
+spec:
+  # Generate one Application per element in this list
+  generators:
+    - list:
+        elements:
+          - app: web
+          - app: admin
+          - app: api
+
+  template:
+    metadata:
+      name: "festpage-{{app}}"
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+
+    spec:
+      project: default
+
+      source:
+        repoURL: https://github.com/eduardolivenza/fest-page
+        targetRevision: HEAD
+        # Each app has its own chart folder
+        path: "helm/{{app}}"
+        helm:
+          valueFiles:
+            - values.yaml
+          parameters:
+            # Don't let Helm create the secret — it's managed manually above (api only)
+            - name: secrets.create
+              value: "false"
+            # Pull secret for ghcr.io
+            - name: global.imagePullSecrets[0].name
+              value: ghcr-credentials
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: festpage
+
+      syncPolicy:
+        automated:
+          prune: true      # remove resources deleted from Git
+          selfHeal: true   # revert manual cluster changes
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+          - RespectIgnoreDifferences=true
+
+      # Don't overwrite the manually-managed API secret
+      ignoreDifferences:
+        - group: ""
+          kind: Secret
+          name: festpage-api
+          jsonPointers:
+            - /data

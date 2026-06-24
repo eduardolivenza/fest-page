@@ -1,0 +1,29 @@
+image:
+  repository: ghcr.io/eduardolivenza/festpage/web
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicas: 2
+
+resources:
+  requests:
+    memory: 128Mi
+    cpu: 100m
+  limits:
+    memory: 512Mi
+    cpu: 500m
+
+# Public URL of the API — baked in at build time via NEXT_PUBLIC_API_URL,
+# but also set as a runtime env var for server-side fetches.
+apiUrl: https://api.festpage.com
+
+ingress:
+  className: nginx
+  host: festpage.com
+  tls:
+    enabled: true
+    secretName: festpage-web-tls
+    clusterIssuer: letsencrypt-prod
+
+global:
+  imagePullSecrets: []

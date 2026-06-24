@@ -1,0 +1,59 @@
+image:
+  repository: ghcr.io/eduardolivenza/festpage/api
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicas: 2
+
+resources:
+  requests:
+    memory: 128Mi
+    cpu: 100m
+  limits:
+    memory: 512Mi
+    cpu: 500m
+
+# CORS allowed origins
+cors:
+  webUrl: https://festpage.com
+  adminUrl: https://admin.festpage.com
+
+ingress:
+  className: nginx
+  host: api.festpage.com
+  tls:
+    enabled: true
+    secretName: festpage-api-tls
+    clusterIssuer: letsencrypt-prod
+
+# secrets.create=true  → Helm creates the K8s Secret (manual helm install)
+# secrets.create=false → Secret must already exist   (ArgoCD deploy)
+#
+# To create it manually:
+#   kubectl create secret generic festpage-api \
+#     --from-literal=JWT_SECRET=<value> \
+#     --from-literal=DATABASE_URL="postgresql://festpage:<pass>@festpage-api-postgresql:5432/festpage" \
+#     -n festpage
+secrets:
+  create: true
+  jwtSecret: ""
+
+postgresql:
+  enabled: true
+  auth:
+    database: festpage
+    username: festpage
+    password: ""
+  primary:
+    persistence:
+      size: 5Gi
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+
+global:
+  imagePullSecrets: []

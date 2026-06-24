@@ -1,14 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-admin
+  name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "festpage.labels" . | nindent 4 }}
-    app.kubernetes.io/component: admin
+    app.kubernetes.io/name: festpage-admin
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   selector:
-    {{- include "festpage.selectorLabels" (dict "root" . "component" "admin") | nindent 4 }}
+    app.kubernetes.io/name: festpage-admin
+    app.kubernetes.io/instance: {{ .Release.Name }}
   ports:
     - port: 3002
       targetPort: 3002
@@ -16,20 +17,22 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-admin
+  name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "festpage.labels" . | nindent 4 }}
-    app.kubernetes.io/component: admin
+    app.kubernetes.io/name: festpage-admin
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
-  replicas: {{ .Values.admin.replicas }}
+  replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
-      {{- include "festpage.selectorLabels" (dict "root" . "component" "admin") | nindent 6 }}
+      app.kubernetes.io/name: festpage-admin
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        {{- include "festpage.selectorLabels" (dict "root" . "component" "admin") | nindent 8 }}
+        app.kubernetes.io/name: festpage-admin
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
@@ -37,15 +40,15 @@ spec:
       {{- end }}
       containers:
         - name: admin
-          image: {{ include "festpage.image" (dict "registry" .Values.global.imageRegistry "repo" .Values.admin.image.repository "tag" .Values.admin.image.tag) }}
-          imagePullPolicy: {{ .Values.admin.image.pullPolicy }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 3002
           env:
             - name: NODE_ENV
               value: production
             - name: NEXT_PUBLIC_API_URL
-              value: {{ printf "https://%s" .Values.ingress.hosts.api }}
+              value: {{ .Values.apiUrl | quote }}
           readinessProbe:
             httpGet:
               path: /login
@@ -60,4 +63,4 @@ spec:
             periodSeconds: 30
             failureThreshold: 3
           resources:
-            {{- toYaml .Values.admin.resources | nindent 12 }}
+            {{- toYaml .Values.resources | nindent 12 }}
