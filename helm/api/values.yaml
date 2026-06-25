@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/eduardolivenza/festpage/api
-  tag: v0.0.13
+  tag: v0.0.14
   pullPolicy: IfNotPresent
 replicas: 2
 resources:
