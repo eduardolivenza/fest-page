@@ -55,11 +55,13 @@ spec:
                 sleep 5
               done
           env:
-            - name: DATABASE_URL
+            - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: DATABASE_URL
+                  name: {{ .Release.Name }}-postgresql
+                  key: password
+            - name: DATABASE_URL
+              value: "postgresql://{{ .Values.postgresql.auth.username }}:$(DB_PASSWORD)@{{ .Release.Name }}-postgresql:5432/{{ .Values.postgresql.auth.database }}"
           resources:
             requests:
               memory: 128Mi
@@ -76,11 +78,13 @@ spec:
           env:
             - name: NODE_ENV
               value: production
-            - name: DATABASE_URL
+            - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: DATABASE_URL
+                  name: {{ .Release.Name }}-postgresql
+                  key: password
+            - name: DATABASE_URL
+              value: "postgresql://{{ .Values.postgresql.auth.username }}:$(DB_PASSWORD)@{{ .Release.Name }}-postgresql:5432/{{ .Values.postgresql.auth.database }}"
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
