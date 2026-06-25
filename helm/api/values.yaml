@@ -36,6 +36,8 @@ secrets:
   jwtSecret: ""
 postgresql:
   enabled: true
+  image:
+    tag: latest
   auth:
     database: festpage
     username: festpage
