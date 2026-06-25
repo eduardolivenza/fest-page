@@ -4,15 +4,15 @@ metadata:
   name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: festpage-api
+    app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   selector:
-    app.kubernetes.io/name: festpage-api
+    app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
   ports:
-    - port: 3001
-      targetPort: 3001
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.port }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -20,18 +20,18 @@ metadata:
   name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: festpage-api
+    app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: festpage-api
+      app.kubernetes.io/name: {{ .Chart.Name }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: festpage-api
+        app.kubernetes.io/name: {{ .Chart.Name }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       {{- with .Values.global.imagePullSecrets }}
@@ -74,7 +74,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: 3001
+            - containerPort: {{ .Values.service.port }}
           env:
             - name: NODE_ENV
               value: production
@@ -97,13 +97,13 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: 3001
+              port: {{ .Values.service.port }}
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /health
-              port: 3001
+              port: {{ .Values.service.port }}
             initialDelaySeconds: 30
             periodSeconds: 30
             failureThreshold: 3

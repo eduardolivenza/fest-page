@@ -26,4 +26,4 @@ spec:
               service:
                 name: {{ .Release.Name }}
                 port:
-                  number: 3001
+                  number: {{ .Values.service.port }}

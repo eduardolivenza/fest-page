@@ -58,9 +58,6 @@ spec:
         path: "helm/{{app}}"
         helm:
           parameters:
-            # Don't let Helm create the secret — it's managed manually above (api only)
-            - name: secrets.create
-              value: "false"
             # Pull secret for ghcr.io
             - name: global.imagePullSecrets[0].name
               value: ghcr-credentials
