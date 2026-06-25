@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/eduardolivenza/festpage/admin
-  tag: v0.1.0
+  tag: v0.1.1
   pullPolicy: IfNotPresent
 replicas: 1
 service:
