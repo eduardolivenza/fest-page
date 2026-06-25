@@ -30,11 +30,11 @@ RUN pnpm run build
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-# outputFileTracingRoot shifts server.js and assets into apps/web/ within the standalone output
-COPY --from=builder /repo/apps/web/.next/standalone ./
-COPY --from=builder /repo/apps/web/.next/static ./apps/web/.next/static
-COPY --from=builder /repo/apps/web/public ./apps/web/public
 RUN addgroup -g 1001 -S nodejs && adduser -S appuser -u 1001
+# outputFileTracingRoot shifts server.js and assets into apps/web/ within the standalone output
+COPY --chown=appuser:nodejs --from=builder /repo/apps/web/.next/standalone ./
+COPY --chown=appuser:nodejs --from=builder /repo/apps/web/.next/static ./apps/web/.next/static
+COPY --chown=appuser:nodejs --from=builder /repo/apps/web/public ./apps/web/public
 USER appuser
 EXPOSE 3000
 CMD ["node", "apps/web/server.js"]
