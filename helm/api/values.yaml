@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/eduardolivenza/festpage/api
-  tag: v0.1.0
+  tag: v0.1.1
   pullPolicy: IfNotPresent
 replicas: 1
 service:
@@ -49,8 +49,8 @@ postgresql:
   image:
     tag: latest
   auth:
-    database: festpage
-    username: festpage
+    database: fest-descans
+    username: fest-descans
     # Must match .Release.Name — ArgoCD sets this to "fest-descans-api" via the ApplicationSet.
     existingSecret: "fest-descans-api"
   primary:
