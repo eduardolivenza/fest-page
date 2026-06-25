@@ -47,6 +47,8 @@ spec:
           env:
             - name: NODE_ENV
               value: production
+            - name: PORT
+              value: {{ .Values.service.port | quote }}
             - name: NEXT_PUBLIC_API_URL
               value: {{ .Values.apiUrl | quote }}
           readinessProbe:
