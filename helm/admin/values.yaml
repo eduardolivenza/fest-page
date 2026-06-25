@@ -12,13 +12,13 @@ resources:
   limits:
     memory: 256Mi
     cpu: 250m
-apiUrl: https://api.festpage.com
+apiUrl: https://api.festdescans.com
 ingress:
   className: traefik
-  host: admin.festpage.com
+  host: admin.festdescans.com
   tls:
     enabled: false
-    secretName: festpage-admin-tls
+    secretName: fest-descans-admin-tls
     clusterIssuer: letsencrypt-prod
 global:
   imagePullSecrets: []

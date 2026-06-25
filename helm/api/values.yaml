@@ -1,5 +1,5 @@
 image:
-  repository: ghcr.io/eduardolivenza/festpage/api
+  repository: ghcr.io/eduardolivenza/fest-descans/api
   tag: v0.1.0
   pullPolicy: IfNotPresent
 replicas: 1
@@ -14,14 +14,14 @@ resources:
     cpu: 500m
 # CORS allowed origins
 cors:
-  webUrl: https://festpage.com
-  adminUrl: https://admin.festpage.com
+  webUrl: https://festdescans.com
+  adminUrl: https://admin.festdescans.com
 ingress:
   className: traefik
-  host: api.festpage.com
+  host: api.festdescans.com
   tls:
     enabled: false
-    secretName: festpage-api-tls
+    secretName: fest-descans-api-tls
     clusterIssuer: letsencrypt-prod
 # secrets.create=true  → Helm creates the K8s Secret (manual helm install)
 # secrets.create=false → Secret must already exist   (ArgoCD deploy)
@@ -31,11 +31,11 @@ ingress:
 # same key, so they can never drift.
 #
 # To create it manually (ArgoCD path):
-#   kubectl create secret generic festpage-api \
+#   kubectl create secret generic fest-descans-api \
 #     --from-literal=JWT_SECRET=<value> \
 #     --from-literal=password=<alphanumeric-db-password> \
 #     --from-literal=postgres-password=<alphanumeric-admin-password> \
-#     -n festpage
+#     -n fest-descans
 #
 # For manual helm install (secrets.create=true), set:
 #   secrets.jwtSecret, secrets.dbPassword, secrets.postgresPassword
@@ -49,10 +49,10 @@ postgresql:
   image:
     tag: latest
   auth:
-    database: festpage
-    username: festpage
-    # Must match .Release.Name — ArgoCD sets this to "festpage-api" via the ApplicationSet.
-    existingSecret: "festpage-api"
+    database: fest-descans
+    username: fest-descans
+    # Must match .Release.Name — ArgoCD sets this to "fest-descans-api" via the ApplicationSet.
+    existingSecret: "fest-descans-api"
   primary:
     persistence:
       size: 5Gi

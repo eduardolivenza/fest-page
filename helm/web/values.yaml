@@ -14,13 +14,13 @@ resources:
     cpu: 500m
 # Public URL of the API — baked in at build time via NEXT_PUBLIC_API_URL,
 # but also set as a runtime env var for server-side fetches.
-apiUrl: https://api.festpage.com
+apiUrl: https://api.festdescans.com
 ingress:
   className: traefik
-  host: festpage.com
+  host: festdescans.com
   tls:
     enabled: false
-    secretName: festpage-web-tls
+    secretName: fest-descans-web-tls
     clusterIssuer: letsencrypt-prod
 global:
   imagePullSecrets: []

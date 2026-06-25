@@ -1,4 +1,4 @@
-# ArgoCD ApplicationSet — festpage
+# ArgoCD ApplicationSet — fest-descans
 #
 # Generates 3 independent Applications (web, admin, api) from a single template.
 # Each app tracks its own helm/<app>/ chart, so they can be synced and rolled back
@@ -6,35 +6,35 @@
 #
 # Prerequisites — run once before applying:
 #
-#   kubectl create namespace festpage
+#   kubectl create namespace fest-descans
 #
 #   # Pull secret for ghcr.io (needed by all 3 apps)
 #   kubectl create secret docker-registry ghcr-credentials \
 #     --docker-server=ghcr.io \
 #     --docker-username=<github-user> \
 #     --docker-password=<github-personal-access-token> \
-#     -n festpage
+#     -n fest-descans
 #
 #   # API secrets — single source of truth for both the app and PostgreSQL.
 #   # Bitnami reads 'password' to initialize the DB user; the app reads the
 #   # same key at runtime, so they can never drift.
-#   kubectl create secret generic festpage-api \
+#   kubectl create secret generic fest-descans-api \
 #     --from-literal=JWT_SECRET=<long-random-string> \
 #     --from-literal=password=<alphanumeric-db-password> \
 #     --from-literal=postgres-password=<alphanumeric-admin-password> \
-#     -n festpage
+#     -n fest-descans
 #
 #   # Add repo to ArgoCD
 #   argocd repo add https://github.com/eduardolivenza/fest-page \
 #     --username <github-user> --password <github-pat>
 #
 #   # Apply this file
-#   kubectl apply -f argocd/festpage-appset.yaml
+#   kubectl apply -f argocd/fest-descans-appset.yaml
 
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: festpage
+  name: fest-descans
   namespace: argocd
 spec:
   # Generate one Application per element in this list
@@ -47,7 +47,7 @@ spec:
 
   template:
     metadata:
-      name: "festpage-{{app}}"
+      name: "fest-descans-{{app}}"
       finalizers:
         - resources-finalizer.argocd.argoproj.io
 
@@ -67,7 +67,7 @@ spec:
 
       destination:
         server: https://kubernetes.default.svc
-        namespace: festpage
+        namespace: fest-descans
 
       syncPolicy:
         automated:
@@ -82,6 +82,6 @@ spec:
       ignoreDifferences:
         - group: ""
           kind: Secret
-          name: festpage-api
+          name: fest-descans-api
           jsonPointers:
             - /data
