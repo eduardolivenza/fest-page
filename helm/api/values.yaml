@@ -32,7 +32,7 @@ ingress:
 #     --from-literal=JWT_SECRET=<value> \
 #     -n festpage
 secrets:
-  create: true
+  create: false
   jwtSecret: ""
 postgresql:
   enabled: true

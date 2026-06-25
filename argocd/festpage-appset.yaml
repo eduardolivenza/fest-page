@@ -57,8 +57,6 @@ spec:
         # Each app has its own chart folder
         path: "helm/{{app}}"
         helm:
-          valueFiles:
-            - values.yaml
           parameters:
             # Don't let Helm create the secret — it's managed manually above (api only)
             - name: secrets.create
