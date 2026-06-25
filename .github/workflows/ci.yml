@@ -9,7 +9,7 @@ name: CI/CD
 #
 # Required repository secrets:  none beyond the default GITHUB_TOKEN
 # Optional repository variable:
-#   NEXT_PUBLIC_API_URL — defaults to https://api.festpage.com
+#   NEXT_PUBLIC_API_URL — defaults to http://api.festdescans.com
 
 on:
   push:
@@ -92,7 +92,7 @@ jobs:
             ${{ env.IMAGE_BASE }}/${{ matrix.app }}:${{ needs.version.outputs.tag }}
             ${{ env.IMAGE_BASE }}/${{ matrix.app }}:latest
           build-args: |
-            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL || 'https://api.festpage.com' }}
+            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL || 'http://api.festdescans.com' }}
           cache-from: type=gha,scope=${{ matrix.app }}
           cache-to: type=gha,mode=max,scope=${{ matrix.app }}
 
