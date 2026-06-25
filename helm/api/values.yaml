@@ -30,15 +30,20 @@ ingress:
 # Bitnami reads 'password' to initialize the DB user; the app reads the
 # same key, so they can never drift.
 #
-# To create it manually:
+# To create it manually (ArgoCD path):
 #   kubectl create secret generic festpage-api \
 #     --from-literal=JWT_SECRET=<value> \
 #     --from-literal=password=<alphanumeric-db-password> \
 #     --from-literal=postgres-password=<alphanumeric-admin-password> \
 #     -n festpage
+#
+# For manual helm install (secrets.create=true), set:
+#   secrets.jwtSecret, secrets.dbPassword, secrets.postgresPassword
 secrets:
   create: false
   jwtSecret: ""
+  dbPassword: ""
+  postgresPassword: ""
 postgresql:
   enabled: true
   image:
@@ -46,6 +51,7 @@ postgresql:
   auth:
     database: festpage
     username: festpage
+    # Must match .Release.Name — ArgoCD sets this to "festpage-api" via the ApplicationSet.
     existingSecret: "festpage-api"
   primary:
     persistence:
