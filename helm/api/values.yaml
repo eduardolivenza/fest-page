@@ -26,12 +26,15 @@ ingress:
 # secrets.create=true  → Helm creates the K8s Secret (manual helm install)
 # secrets.create=false → Secret must already exist   (ArgoCD deploy)
 #
-# DATABASE_URL is NOT stored here — it is constructed at runtime from the
-# Bitnami-managed secret (festpage-api-postgresql / key: password).
+# This secret is also used by the postgresql sub-chart (existingSecret).
+# Bitnami reads 'password' to initialize the DB user; the app reads the
+# same key, so they can never drift.
 #
 # To create it manually:
 #   kubectl create secret generic festpage-api \
 #     --from-literal=JWT_SECRET=<value> \
+#     --from-literal=password=<alphanumeric-db-password> \
+#     --from-literal=postgres-password=<alphanumeric-admin-password> \
 #     -n festpage
 secrets:
   create: false
@@ -43,7 +46,7 @@ postgresql:
   auth:
     database: festpage
     username: festpage
-    password: ""
+    existingSecret: "festpage-api"
   primary:
     persistence:
       size: 5Gi

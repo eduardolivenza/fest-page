@@ -15,10 +15,13 @@
 #     --docker-password=<github-personal-access-token> \
 #     -n festpage
 #
-#   # API secrets — only JWT_SECRET needed; DATABASE_URL is built from the
-#   # Bitnami-managed festpage-api-postgresql secret at runtime.
+#   # API secrets — single source of truth for both the app and PostgreSQL.
+#   # Bitnami reads 'password' to initialize the DB user; the app reads the
+#   # same key at runtime, so they can never drift.
 #   kubectl create secret generic festpage-api \
 #     --from-literal=JWT_SECRET=<long-random-string> \
+#     --from-literal=password=<alphanumeric-db-password> \
+#     --from-literal=postgres-password=<alphanumeric-admin-password> \
 #     -n festpage
 #
 #   # Add repo to ArgoCD
