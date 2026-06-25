@@ -31,7 +31,7 @@ FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 # outputFileTracingRoot places the standalone output at the monorepo root
-COPY --from=builder /repo/.next/standalone ./
+COPY --from=builder /repo/apps/admin/.next/standalone ./
 COPY --from=builder /repo/apps/admin/.next/static ./.next/static
 COPY --from=builder /repo/apps/admin/public ./public
 RUN addgroup -g 1001 -S nodejs && adduser -S appuser -u 1001
