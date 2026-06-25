@@ -14,7 +14,7 @@ resources:
     cpu: 250m
 apiUrl: https://api.festpage.com
 ingress:
-  className: nginx
+  className: traefik
   host: admin.festpage.com
   tls:
     enabled: false

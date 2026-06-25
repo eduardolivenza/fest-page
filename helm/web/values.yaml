@@ -16,7 +16,7 @@ resources:
 # but also set as a runtime env var for server-side fetches.
 apiUrl: https://api.festpage.com
 ingress:
-  className: nginx
+  className: traefik
   host: festpage.com
   tls:
     enabled: false

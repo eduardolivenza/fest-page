@@ -17,7 +17,7 @@ cors:
   webUrl: https://festpage.com
   adminUrl: https://admin.festpage.com
 ingress:
-  className: nginx
+  className: traefik
   host: api.festpage.com
   tls:
     enabled: false
