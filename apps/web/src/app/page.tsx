@@ -4,7 +4,7 @@ import { HomeContent } from './_components/HomeContent';
 async function getFeaturedProducts(): Promise<Product[]> {
   try {
     const res = await fetch(
-      `${process.env['NEXT_PUBLIC_API_URL']}/api/products?featured=true&pageSize=6`,
+      `${process.env['API_URL']}/api/products?featured=true&pageSize=6`,
       { next: { revalidate: 60 } },
     );
     if (!res.ok) return [];

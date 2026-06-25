@@ -47,7 +47,7 @@ spec:
           env:
             - name: NODE_ENV
               value: production
-            - name: NEXT_PUBLIC_API_URL
+            - name: API_URL
               value: {{ .Values.apiUrl | quote }}
           readinessProbe:
             httpGet:

@@ -4,7 +4,7 @@ import type { Product } from '@festpage/types';
 import { ProductDetail } from './_components/ProductDetail';
 
 async function getProduct(slug: string): Promise<Product | null> {
-  const res = await fetch(`${process.env['NEXT_PUBLIC_API_URL']}/api/products/${slug}`, {
+  const res = await fetch(`${process.env['API_URL']}/api/products/${slug}`, {
     next: { revalidate: 60 },
   });
   if (res.status === 404) return null;

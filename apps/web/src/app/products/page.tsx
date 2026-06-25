@@ -10,7 +10,7 @@ async function getProducts(category?: string): Promise<PaginatedResponse<Product
     if (category) params.set('category', category);
 
     const res = await fetch(
-      `${process.env['NEXT_PUBLIC_API_URL']}/api/products?${params.toString()}`,
+      `${process.env['API_URL']}/api/products?${params.toString()}`,
       { next: { revalidate: 30 } },
     );
     if (!res.ok) return { data: [], total: 0, page: 1, pageSize: 24, totalPages: 0 };
