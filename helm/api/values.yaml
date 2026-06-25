@@ -20,7 +20,7 @@ ingress:
   className: nginx
   host: api.festpage.com
   tls:
-    enabled: true
+    enabled: false
     secretName: festpage-api-tls
     clusterIssuer: letsencrypt-prod
 # secrets.create=true  → Helm creates the K8s Secret (manual helm install)

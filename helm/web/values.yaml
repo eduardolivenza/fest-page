@@ -19,7 +19,7 @@ ingress:
   className: nginx
   host: festpage.com
   tls:
-    enabled: true
+    enabled: false
     secretName: festpage-web-tls
     clusterIssuer: letsencrypt-prod
 global:
