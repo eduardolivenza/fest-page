@@ -32,7 +32,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           workingDir: /repo
           command:
-            - node_modules/.bin/prisma
+            - packages/db/node_modules/.bin/prisma
             - migrate
             - deploy
             - --schema

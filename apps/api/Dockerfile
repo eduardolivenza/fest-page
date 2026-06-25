@@ -5,7 +5,7 @@ RUN corepack enable
 
 FROM base AS deps
 WORKDIR /repo
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY packages/types/package.json packages/types/
 COPY packages/db/package.json packages/db/
 COPY packages/db/prisma packages/db/prisma
@@ -30,6 +30,8 @@ WORKDIR /repo
 ENV NODE_ENV=production
 COPY --from=deps /repo/node_modules ./node_modules
 COPY --from=deps /repo/apps/api/node_modules apps/api/node_modules
+# Copy db node_modules so prisma CLI is available for the migrate job
+COPY --from=deps /repo/packages/db/node_modules packages/db/node_modules
 COPY --from=builder /repo/apps/api/dist apps/api/dist
 COPY --from=builder /repo/packages/db/prisma packages/db/prisma
 RUN addgroup -g 1001 -S nodejs && adduser -S appuser -u 1001
