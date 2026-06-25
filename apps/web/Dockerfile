@@ -5,7 +5,7 @@ RUN corepack enable
 
 FROM base AS deps
 WORKDIR /repo
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY packages/types/package.json packages/types/
 COPY packages/ui/package.json packages/ui/
 COPY packages/config/package.json packages/config/
@@ -30,7 +30,8 @@ RUN pnpm run build
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=builder /repo/apps/web/.next/standalone ./
+# outputFileTracingRoot places the standalone output at the monorepo root
+COPY --from=builder /repo/.next/standalone ./
 COPY --from=builder /repo/apps/web/.next/static ./.next/static
 COPY --from=builder /repo/apps/web/public ./public
 RUN addgroup -g 1001 -S nodejs && adduser -S appuser -u 1001

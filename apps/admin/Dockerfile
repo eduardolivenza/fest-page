@@ -30,9 +30,9 @@ RUN pnpm run build
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=builder /repo/apps/admin/.next/standalone ./
+# outputFileTracingRoot places the standalone output at the monorepo root
+COPY --from=builder /repo/.next/standalone ./
 COPY --from=builder /repo/apps/admin/.next/static ./.next/static
-# FIX: public folder was missing — logos and static assets weren't served
 COPY --from=builder /repo/apps/admin/public ./public
 RUN addgroup -g 1001 -S nodejs && adduser -S appuser -u 1001
 USER appuser
