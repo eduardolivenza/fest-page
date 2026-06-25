@@ -38,6 +38,35 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      initContainers:
+        - name: migrate
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          workingDir: /repo
+          # Retries until PostgreSQL is ready, then runs migrations.
+          # This replaces the pre-install Helm hook which ran before PostgreSQL existed.
+          command:
+            - sh
+            - -c
+            - |
+              until packages/db/node_modules/.bin/prisma migrate deploy \
+                --schema packages/db/prisma/schema.prisma; do
+                echo "Migration failed — PostgreSQL not ready yet, retrying in 5s..."
+                sleep 5
+              done
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: DATABASE_URL
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 256Mi
+              cpu: 200m
       containers:
         - name: api
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
