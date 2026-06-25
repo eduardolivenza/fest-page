@@ -12,7 +12,7 @@ resources:
   limits:
     memory: 256Mi
     cpu: 250m
-apiUrl: https://api.festdescans.com
+apiUrl: http://api.festdescans.com
 ingress:
   className: traefik
   host: admin.festdescans.com

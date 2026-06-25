@@ -14,7 +14,7 @@ resources:
     cpu: 500m
 # Public URL of the API — baked in at build time via NEXT_PUBLIC_API_URL,
 # but also set as a runtime env var for server-side fetches.
-apiUrl: https://api.festdescans.com
+apiUrl: http://api.festdescans.com
 ingress:
   className: traefik
   host: festdescans.com
