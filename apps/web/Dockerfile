@@ -30,11 +30,11 @@ RUN pnpm run build
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-# outputFileTracingRoot places the standalone output at the monorepo root
+# outputFileTracingRoot shifts server.js and assets into apps/web/ within the standalone output
 COPY --from=builder /repo/apps/web/.next/standalone ./
-COPY --from=builder /repo/apps/web/.next/static ./.next/static
-COPY --from=builder /repo/apps/web/public ./public
+COPY --from=builder /repo/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder /repo/apps/web/public ./apps/web/public
 RUN addgroup -g 1001 -S nodejs && adduser -S appuser -u 1001
 USER appuser
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["node", "apps/web/server.js"]
