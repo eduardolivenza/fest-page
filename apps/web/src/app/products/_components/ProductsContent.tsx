@@ -1,17 +1,27 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { ProductCard } from '@festpage/ui';
 import type { Product, ProductCategory } from '@festpage/types';
 import { useT } from '@/i18n';
+import { fetchProducts } from '@/lib/api';
 
-type Props = {
-  products: Product[];
-  activeCategory: string;
-};
-
-export function ProductsContent({ products, activeCategory }: Props) {
+export function ProductsContent() {
   const { t } = useT();
   const p = t.products;
+  const searchParams = useSearchParams();
+  const activeCategory = searchParams.get('category') ?? '';
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchProducts(activeCategory || undefined)
+      .then((result) => setProducts(result.data))
+      .catch(() => setProducts([]))
+      .finally(() => setLoading(false));
+  }, [activeCategory]);
 
   const CATEGORIES: Array<{ value: ProductCategory | ''; label: string }> = [
     { value: '', label: p.filters.all },
@@ -42,7 +52,13 @@ export function ProductsContent({ products, activeCategory }: Props) {
         ))}
       </div>
 
-      {products.length > 0 ? (
+      {loading ? (
+        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="animate-pulse rounded-2xl bg-gray-100 aspect-[3/4]" />
+          ))}
+        </div>
+      ) : products.length > 0 ? (
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} href={`/products/${product.slug}`} />

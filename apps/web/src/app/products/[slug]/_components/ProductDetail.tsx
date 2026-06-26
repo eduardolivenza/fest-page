@@ -1,13 +1,49 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import type { Product } from '@festpage/types';
 import { Badge } from '@festpage/ui';
 import { useT } from '@/i18n';
+import { fetchProduct } from '@/lib/api';
 
-export function ProductDetail({ product }: { product: Product }) {
+export function ProductDetail() {
+  const { slug } = useParams<{ slug: string }>();
   const { t, locale } = useT();
   const p = t.product;
   const priceLocale = locale === 'ca' ? 'ca-ES' : 'es-ES';
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isNotFound, setIsNotFound] = useState(false);
+
+  useEffect(() => {
+    fetchProduct(slug)
+      .then((data) => {
+        if (!data) setIsNotFound(true);
+        else setProduct(data);
+      })
+      .catch(() => setIsNotFound(true))
+      .finally(() => setLoading(false));
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-12">
+        <div className="grid gap-12 lg:grid-cols-2">
+          <div className="animate-pulse rounded-2xl bg-gray-100 aspect-[4/3]" />
+          <div className="space-y-4">
+            <div className="animate-pulse h-6 w-24 rounded-full bg-gray-100" />
+            <div className="animate-pulse h-10 w-3/4 rounded-lg bg-gray-100" />
+            <div className="animate-pulse h-4 w-full rounded bg-gray-100" />
+            <div className="animate-pulse h-4 w-5/6 rounded bg-gray-100" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isNotFound || !product) notFound();
 
   const images = product.images;
   const mainImage = images[0];
