@@ -1,12 +1,19 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ProductCard } from '@festpage/ui';
 import type { Product } from '@festpage/types';
 import { useT } from '@/i18n';
+import { fetchFeaturedProducts } from '@/lib/api';
 
-export function HomeContent({ featured }: { featured: Product[] }) {
+export function HomeContent() {
+  const [featured, setFeatured] = useState<Product[]>([]);
+
+  useEffect(() => {
+    fetchFeaturedProducts().then(setFeatured).catch(() => {});
+  }, []);
   const { t } = useT();
   const h = t.home;
 
