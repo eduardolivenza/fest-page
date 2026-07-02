@@ -24,6 +24,17 @@
 #     --from-literal=postgres-password=<alphanumeric-admin-password> \
 #     -n fest-descans
 #
+#   # Cloudflare Tunnel credentials — bootstrap once from a machine with a browser:
+#   #   cloudflared tunnel login
+#   #   cloudflared tunnel create fest-descans        # note the printed Tunnel UUID
+#   #   cloudflared tunnel route dns fest-descans festdescans.com
+#   #   cloudflared tunnel route dns fest-descans admin.festdescans.com
+#   #   cloudflared tunnel route dns fest-descans api.festdescans.com
+#   # Set helm/cloudflared/values.yaml tunnelId to that UUID, then:
+#   kubectl create secret generic cloudflared-credentials \
+#     --from-file=credentials.json=<path to ~/.cloudflared/<UUID>.json> \
+#     -n fest-descans
+#
 #   # Add repo to ArgoCD
 #   argocd repo add https://github.com/eduardolivenza/fest-page \
 #     --username <github-user> --password <github-pat>
@@ -44,6 +55,7 @@ spec:
           - app: web
           - app: admin
           - app: api
+          - app: cloudflared
 
   template:
     metadata:

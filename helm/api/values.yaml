@@ -14,8 +14,8 @@ resources:
     cpu: 500m
 # CORS allowed origins
 cors:
-  webUrl: http://festdescans.com
-  adminUrl: http://admin.festdescans.com
+  webUrl: https://festdescans.com
+  adminUrl: https://admin.festdescans.com
 ingress:
   className: traefik
   host: api.festdescans.com

@@ -3,7 +3,7 @@ name: CI/CD — web
 # Triggers only when web app or its shared dependencies change.
 #
 # Optional repository variable:
-#   NEXT_PUBLIC_API_URL — defaults to http://api.festdescans.com
+#   NEXT_PUBLIC_API_URL — defaults to https://api.festdescans.com
 
 on:
   push:
@@ -75,7 +75,7 @@ jobs:
             ${{ env.IMAGE }}:${{ needs.version.outputs.tag }}
             ${{ env.IMAGE }}:latest
           build-args: |
-            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL || 'http://api.festdescans.com' }}
+            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL || 'https://api.festdescans.com' }}
           cache-from: type=gha,scope=web
           cache-to: type=gha,mode=max,scope=web
 

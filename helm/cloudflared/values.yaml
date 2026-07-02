@@ -1,0 +1,35 @@
+image:
+  repository: cloudflare/cloudflared
+  # Pinned on purpose — check https://github.com/cloudflare/cloudflared/releases for the latest.
+  tag: "2024.12.2"
+  pullPolicy: IfNotPresent
+replicas: 2
+resources:
+  requests:
+    memory: 64Mi
+    cpu: 50m
+  limits:
+    memory: 128Mi
+    cpu: 200m
+
+# Tunnel UUID from `cloudflared tunnel create fest-descans`.
+tunnelId: "96ed517e-9c76-4e93-8d7d-220cad16eed3"
+
+# Secret created out-of-band (see argocd/fest-descans-appset.yaml prerequisites):
+#   kubectl create secret generic cloudflared-credentials \
+#     --from-file=credentials.json=<path to ~/.cloudflared/<UUID>.json> \
+#     -n fest-descans
+credentialsSecretName: cloudflared-credentials
+
+# Hostname -> in-cluster Service routing. Bypasses Traefik entirely — cloudflared
+# talks directly to each app's ClusterIP Service.
+ingress:
+  - hostname: festdescans.com
+    service: http://fest-descans-web:3000
+  - hostname: admin.festdescans.com
+    service: http://fest-descans-admin:3002
+  - hostname: api.festdescans.com
+    service: http://fest-descans-api:3001
+
+global:
+  imagePullSecrets: []
