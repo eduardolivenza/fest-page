@@ -13,6 +13,7 @@ on:
       - 'packages/ui/**'
       - 'packages/types/**'
       - 'packages/config/**'
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
