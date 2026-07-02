@@ -1,5 +1,6 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 
 const sizeSchema = z.object({
   width: z.number().int().positive(),
@@ -100,7 +101,17 @@ export const adminProductsRoutes: FastifyPluginAsync = async (app) => {
 
   app.delete('/:id', async (request, reply) => {
     const { id } = request.params as { id: string };
-    await app.prisma.product.delete({ where: { id } });
+    try {
+      await app.prisma.product.delete({ where: { id } });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
+        return reply.status(404).send({ message: 'Not found' });
+      }
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2003') {
+        return reply.status(409).send({ message: 'No se puede eliminar: el producto tiene pedidos asociados' });
+      }
+      throw err;
+    }
     return reply.status(204).send();
   });
 };

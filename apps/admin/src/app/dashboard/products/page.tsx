@@ -24,9 +24,14 @@ export default function ProductsPage() {
   async function handleDelete(id: string) {
     if (!confirm('¿Eliminar este producto?')) return;
     setDeleting(id);
-    await apiFetch(`/api/admin/products/${id}`, { method: 'DELETE' });
-    await load();
-    setDeleting(null);
+    try {
+      await apiFetch(`/api/admin/products/${id}`, { method: 'DELETE' });
+      await load();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'No se pudo eliminar el producto');
+    } finally {
+      setDeleting(null);
+    }
   }
 
   return (
