@@ -84,6 +84,9 @@ jobs:
     name: Update image tag
     needs: [version, build]
     runs-on: ubuntu-latest
+    concurrency:
+      group: gitops-values-push
+      cancel-in-progress: false
     permissions:
       contents: write
     steps:
@@ -105,4 +108,14 @@ jobs:
           git add helm/admin/values.yaml
           git diff --staged --quiet && echo "No changes to commit" && exit 0
           git commit -m "ci: update admin image to ${{ needs.version.outputs.tag }} [skip ci]"
-          git push
+          n=0
+          until git push; do
+            n=$((n + 1))
+            if [ "$n" -ge 5 ]; then
+              echo "Failed to push after $n attempts"
+              exit 1
+            fi
+            echo "Push rejected, rebasing onto latest main (attempt $n)..."
+            git fetch origin main
+            git rebase origin/main
+          done
