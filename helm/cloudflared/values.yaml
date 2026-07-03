@@ -30,6 +30,9 @@ ingress:
     service: http://fest-descans-admin:3002
   - hostname: api.festdescans.com
     service: http://fest-descans-api:3001
+  # Different namespace — needs the fully-qualified cluster DNS name.
+  - hostname: homeassistant.festdescans.com
+    service: http://home-assistant.home-assistant.svc.cluster.local:8123
 
 global:
   imagePullSecrets: []
