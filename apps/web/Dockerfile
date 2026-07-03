@@ -13,6 +13,7 @@ COPY packages/config/src packages/config/src
 COPY apps/web/package.json apps/web/
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
+
 FROM base AS builder
 WORKDIR /repo
 COPY --from=deps /repo/node_modules ./node_modules

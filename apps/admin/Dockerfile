@@ -38,3 +38,4 @@ COPY --chown=appuser:nodejs --from=builder /repo/apps/admin/public ./apps/admin/
 USER appuser
 EXPOSE 3002
 CMD ["node", "apps/admin/server.js"]
+

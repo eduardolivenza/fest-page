@@ -38,3 +38,4 @@ RUN addgroup -g 1001 -S nodejs && adduser -S appuser -u 1001
 USER appuser
 EXPOSE 3001
 CMD ["node", "apps/api/dist/index.js"]
+
