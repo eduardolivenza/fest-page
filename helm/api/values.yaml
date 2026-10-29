@@ -68,13 +68,20 @@ postgresql:
       enabled: true
       initialDelaySeconds: 15
       periodSeconds: 10
-      timeoutSeconds: 5
-      failureThreshold: 60
+      timeoutSeconds: 15
+      failureThreshold: 180
     livenessProbe:
       enabled: true
       initialDelaySeconds: 0
       periodSeconds: 30
-      timeoutSeconds: 10
+      timeoutSeconds: 15
       failureThreshold: 10
+    readinessProbe:
+      enabled: true
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 15
+      failureThreshold: 6
+      successThreshold: 1
 global:
   imagePullSecrets: []
