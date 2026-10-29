@@ -83,5 +83,8 @@ postgresql:
       timeoutSeconds: 15
       failureThreshold: 6
       successThreshold: 1
+    terminationGracePeriodSeconds: 120
+    extendedConfiguration: |
+      recovery_init_sync_method = syncfs
 global:
   imagePullSecrets: []
