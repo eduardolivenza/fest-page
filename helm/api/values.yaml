@@ -48,6 +48,7 @@ postgresql:
   enabled: true
   image:
     tag: latest
+    digest: sha256:f67b10b185d344b15e9999b57bdbedb13b9a4c33aa3a939467ee519cec49d40e
   auth:
     database: fest-descans
     username: fest-descans
@@ -63,5 +64,17 @@ postgresql:
       limits:
         memory: 512Mi
         cpu: 500m
+    startupProbe:
+      enabled: true
+      initialDelaySeconds: 15
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 60
+    livenessProbe:
+      enabled: true
+      initialDelaySeconds: 0
+      periodSeconds: 30
+      timeoutSeconds: 10
+      failureThreshold: 10
 global:
   imagePullSecrets: []
