@@ -86,5 +86,7 @@ postgresql:
     terminationGracePeriodSeconds: 120
     extendedConfiguration: |
       recovery_init_sync_method = syncfs
+      checkpoint_timeout = 60s
+      io_method = sync
 global:
   imagePullSecrets: []
