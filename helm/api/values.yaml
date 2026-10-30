@@ -23,27 +23,14 @@ ingress:
     enabled: false
     secretName: fest-descans-api-tls
     clusterIssuer: letsencrypt-prod
-# secrets.create=true  → Helm creates the K8s Secret (manual helm install)
-# secrets.create=false → Secret must already exist   (ArgoCD deploy)
-#
-# This secret is also used by the postgresql sub-chart (existingSecret).
-# Bitnami reads 'password' to initialize the DB user; the app reads the
-# same key, so they can never drift.
-#
-# To create it manually (ArgoCD path):
-#   kubectl create secret generic fest-descans-api \
-#     --from-literal=JWT_SECRET=<value> \
-#     --from-literal=password=<alphanumeric-db-password> \
-#     --from-literal=postgres-password=<alphanumeric-admin-password> \
-#     -n fest-descans
-#
-# For manual helm install (secrets.create=true), set:
-#   secrets.jwtSecret, secrets.dbPassword, secrets.postgresPassword
-secrets:
-  create: false
-  jwtSecret: ""
-  dbPassword: ""
-  postgresPassword: ""
+# Secrets are SealedSecrets in templates/ (encrypted for the homelab cluster's
+# sealed-secrets controller, safe to commit):
+#   sealed-secret.yaml            -> Secret "fest-descans-api": JWT_SECRET, password, postgres-password
+#                                   (also the postgresql subchart's existingSecret)
+#   sealed-ghcr-credentials.yaml  -> Secret "ghcr-credentials" (ghcr.io pull secret for web/admin/api)
+# Rotate: kubectl create secret ... --dry-run=client -o yaml | kubeseal -o yaml > templates/<file>.yaml
+# DB passwords are only read at first init: also ALTER USER inside PostgreSQL when rotating.
+# Full guide: homelab repo, .claude/skills/homelab-secrets/SKILL.md
 postgresql:
   enabled: true
   image:
@@ -89,4 +76,7 @@ postgresql:
       checkpoint_timeout = 60s
       io_method = sync
 global:
-  imagePullSecrets: []
+  # Pull secret for the private ghcr.io images. The SealedSecret lives in the api chart
+  # (helm/api/templates/sealed-ghcr-credentials.yaml); all apps share the namespace.
+  imagePullSecrets:
+    - name: ghcr-credentials

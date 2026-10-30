@@ -21,4 +21,7 @@ ingress:
     secretName: fest-descans-admin-tls
     clusterIssuer: letsencrypt-prod
 global:
-  imagePullSecrets: []
+  # Pull secret for the private ghcr.io images. The SealedSecret lives in the api chart
+  # (helm/api/templates/sealed-ghcr-credentials.yaml); all apps share the namespace.
+  imagePullSecrets:
+    - name: ghcr-credentials
