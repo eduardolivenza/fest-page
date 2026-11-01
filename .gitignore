@@ -9,3 +9,7 @@ coverage
 .idea
 apps/api/src/generated
 *.tsbuildinfo
+# leftover cache from the removed Nx
+.nx
+# written by `next dev` (Next 16)
+apps/*/AGENTS.md
