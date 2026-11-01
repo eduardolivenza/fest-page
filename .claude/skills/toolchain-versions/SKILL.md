@@ -44,6 +44,7 @@ pnpm check:versions --latest   # + recommended latest releases from nodejs.org a
 - **`allowBuilds`** in `pnpm-workspace.yaml`: every dependency with install scripts must be listed `true`/`false`, or the install fails (`ERR_PNPM_IGNORED_BUILDS`). A new native dependency needs an entry.
 - **`minimumReleaseAge`** (default 1 day): packages published < 24h ago are rejected, also from the lockfile. Wait, or (only if the user agrees) add the exact `name@version` to `minimumReleaseAgeExclude` with a removal date. Never set it to 0 on your own, and never commit an exclusion pnpm added by itself. Renovate waits 3 days for npm updates for this reason.
 - Settings live in `pnpm-workspace.yaml`; the `pnpm` field in `package.json` is ignored.
+- If `pnpm-lock.yaml` gains `@pnpm/exe` entries, an older global pnpm handed over to the pinned one and recorded its launcher. Don't commit that: restore the lockfile and rerun with `npx -y pnpm@<pinned> install` (or upgrade the global pnpm).
 - `verifyDepsBeforeRun: false` is deliberate (Docker stages copy `node_modules`).
 - No corepack (Node 25+ doesn't ship it): Dockerfiles install pnpm with `npm install -g`.
 
@@ -53,4 +54,9 @@ pnpm check:versions --latest   # + recommended latest releases from nodejs.org a
 - **argon2 on Alpine**: its musl prebuild doesn't load on `node:*-alpine`, so the api Dockerfile `deps` stage installs `python3 make g++` to build it. Keep that.
 - **Prisma 7**: client is generated into `apps/api/src/generated/prisma` (gitignored); URL in `packages/db/prisma.config.ts`; driver adapter required. See `arch-api`.
 - **Next 16**: Turbopack by default: CSS `@import` must come before `@tailwind`. `next lint` no longer exists.
-- Majors with known breaking changes, not yet adopted: TypeScript 7, Vitest 5, Tailwind 4, Zod 4. Treat each as its own planned upgrade.
+- **TypeScript 7** (Go-native `tsc`, statically linked so it runs on Alpine):
+  - `baseUrl` is removed: `paths` are relative to the tsconfig that declares them (`./packages/...` in the root config).
+  - `types` defaults to `[]`: code that uses Node globals declares `"types": ["node"]` (api). `strict`, `esModuleInterop` are always on.
+  - **No JS compiler API in 7.0** (`import ts from 'typescript'` fails). `next build` type-checks through the `tsc` CLI (Next's default, `experimental.useTypeScriptCli`), so it works. If a new tool needs the API (typescript-eslint, ts-node, …), install TypeScript 6 side by side as the docs recommend: `"@typescript/native": "npm:typescript@^7"` + `"typescript": "npm:@typescript/typescript6@^6"`.
+  - Editors: Next's TS language-service plugin may not load under the TS 7 language server; in VS Code "Disable TypeScript 7 Language Server" falls back to the editor's bundled TS.
+- Majors with known breaking changes, not yet adopted: Vitest 5, Tailwind 4, Zod 4. Treat each as its own planned upgrade.

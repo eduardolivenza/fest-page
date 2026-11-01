@@ -10,7 +10,6 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "jsx": "preserve",
-    "baseUrl": ".",
     "plugins": [
       {
         "name": "next"
