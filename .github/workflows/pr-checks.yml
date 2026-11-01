@@ -36,6 +36,10 @@ jobs:
           node-version: 26
           cache: pnpm
 
+      # Every Node/pnpm/Prisma/Next pin must agree (scripts/check-versions.mjs).
+      - name: Version pins
+        run: node scripts/check-versions.mjs
+
       # Fails on a stale or badly merged lockfile (e.g. two Renovate PRs merged back to back).
       - name: Install
         run: pnpm install --frozen-lockfile

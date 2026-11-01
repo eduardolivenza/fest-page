@@ -11,7 +11,8 @@
     "db:generate": "nx run db:generate",
     "db:migrate": "nx run db:migrate",
     "db:seed": "nx run db:seed",
-    "db:studio": "nx run db:studio"
+    "db:studio": "nx run db:studio",
+    "check:versions": "node scripts/check-versions.mjs"
   },
   "devDependencies": {
     "@nx/eslint": "^24.0.0",
