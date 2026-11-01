@@ -1,0 +1,50 @@
+name: PR checks
+
+# Gate for merging into main: install, typecheck, test and build every app.
+# Runs on every PR (no path filter) so the required "Checks" status always reports;
+# a path-filtered required check would stay pending forever on PRs it skips.
+#
+# Make it required: Settings → Rules → Rulesets → main → "Require status checks to pass" → "Checks".
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  checks:
+    name: Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      # Fails on a stale or badly merged lockfile (e.g. two Renovate PRs merged back to back).
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm -r --if-present run test
+
+      - name: Build
+        run: pnpm --filter "./apps/*" run build
