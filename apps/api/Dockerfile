@@ -4,6 +4,9 @@ ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
 FROM base AS deps
+# Toolchain for native modules whose prebuilt binary does not load on Alpine
+# (argon2 >= 0.45 falls back to node-gyp). Build stage only: not in the runner image.
+RUN apk add --no-cache python3 make g++
 WORKDIR /repo
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY packages/types/package.json packages/types/
@@ -36,7 +39,7 @@ COPY --from=deps /repo/apps/api/node_modules apps/api/node_modules
 COPY --from=deps /repo/packages/db/node_modules packages/db/node_modules
 COPY --from=builder /repo/apps/api/dist apps/api/dist
 COPY --from=builder /repo/packages/db/prisma packages/db/prisma
-COPY --from=builder /repo/packages/db/prisma.config.ts packages/db/package.json packages/db/
+COPY --from=builder /repo/packages/db/prisma.config.ts /repo/packages/db/package.json packages/db/
 RUN addgroup -g 1001 -S nodejs && adduser -S appuser -u 1001
 USER appuser
 EXPOSE 3001

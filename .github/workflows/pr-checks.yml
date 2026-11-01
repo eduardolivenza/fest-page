@@ -1,0 +1,99 @@
+name: PR checks
+
+# Gate for merging into main: install, typecheck, test and build every app, and build the Docker images.
+# Runs on every PR (no path filter) so the required "Checks" status always reports;
+# a path-filtered required check would stay pending forever on PRs it skips.
+#
+# Make it required: Settings → Rules → Rulesets → main → "Require status checks to pass" →
+# "Checks", "Image (api)", "Image (web)", "Image (admin)".
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  checks:
+    name: Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      # Fails on a stale or badly merged lockfile (e.g. two Renovate PRs merged back to back).
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm -r --if-present run test
+
+      - name: Build
+        run: pnpm --filter "./apps/*" run build
+
+  images:
+    name: Image (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [api, web, admin]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      # Build only (no push): catches Dockerfile and native-module breakage before merge.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/${{ matrix.app }}/Dockerfile
+          push: false
+          load: true
+          tags: festpage-${{ matrix.app }}:pr
+          cache-from: type=gha,scope=${{ matrix.app }}
+      # Runs the api image the way the cluster does: migrations (initContainer command),
+      # then the server against a real PostgreSQL, plus a check that argon2 loads.
+      - name: Smoke test api image
+        if: matrix.app == 'api'
+        env:
+          DATABASE_URL: postgresql://festpage:festpage@localhost:5432/festpage
+        run: |
+          retry() { for i in $(seq 15); do "$@" && return 0; sleep 2; done; return 1; }
+
+          docker run -d --name pg -p 5432:5432 \
+            -e POSTGRES_USER=festpage -e POSTGRES_PASSWORD=festpage -e POSTGRES_DB=festpage \
+            postgres:18-alpine
+
+          docker run --rm -w /repo/apps/api festpage-api:pr node --input-type=module \
+            -e "const a = await import('argon2'); await a.verify(await a.hash('x'), 'x'); console.log('argon2 ok')"
+
+          retry docker run --rm --network host -w /repo/packages/db -e DATABASE_URL \
+            festpage-api:pr node_modules/.bin/prisma migrate deploy
+
+          docker run -d --name api --network host -e DATABASE_URL -e JWT_SECRET=ci festpage-api:pr
+          retry curl -fsS localhost:3001/health
+          curl -fsS localhost:3001/api/products | tee /dev/stderr | grep -q '"total":0'
+          echo "api image ok"
+
+      - name: Api container logs
+        if: failure() && matrix.app == 'api'
+        run: docker logs api || true
