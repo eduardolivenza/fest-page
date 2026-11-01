@@ -17,3 +17,9 @@ allowBuilds:
 # Don't let `pnpm run` start an install when node_modules looks stale (Docker build stages
 # copy node_modules between stages; CI installs explicitly with --frozen-lockfile).
 verifyDepsBeforeRun: false
+
+# pnpm 12 rejects packages published less than 24h ago (minimumReleaseAge). These two were
+# merged on 2026-11-01, hours before the upgrade. Remove after 2026-11-02 15:00 UTC.
+minimumReleaseAgeExclude:
+  - '@fastify/swagger@9.9.3'
+  - fast-json-stringify@7.2.1
