@@ -1,4 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
+import { Prisma } from '@prisma/client';
 
 export const adminContactsRoutes: FastifyPluginAsync = async (app) => {
   app.addHook('preHandler', app.authenticate);
@@ -26,5 +27,18 @@ export const adminContactsRoutes: FastifyPluginAsync = async (app) => {
   app.patch('/:id/read', async (request) => {
     const { id } = request.params as { id: string };
     return app.prisma.contactRequest.update({ where: { id }, data: { read: true } });
+  });
+
+  app.delete('/:id', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    try {
+      await app.prisma.contactRequest.delete({ where: { id } });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
+        return reply.status(404).send({ message: 'Not found' });
+      }
+      throw err;
+    }
+    return reply.status(204).send();
   });
 };
