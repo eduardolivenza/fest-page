@@ -39,7 +39,7 @@ COPY --from=deps /repo/apps/api/node_modules apps/api/node_modules
 COPY --from=deps /repo/packages/db/node_modules packages/db/node_modules
 COPY --from=builder /repo/apps/api/dist apps/api/dist
 COPY --from=builder /repo/packages/db/prisma packages/db/prisma
-COPY --from=builder /repo/packages/db/prisma.config.ts packages/db/package.json packages/db/
+COPY --from=builder /repo/packages/db/prisma.config.ts /repo/packages/db/package.json packages/db/
 RUN addgroup -g 1001 -S nodejs && adduser -S appuser -u 1001
 USER appuser
 EXPOSE 3001

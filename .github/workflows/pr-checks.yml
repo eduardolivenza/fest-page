@@ -70,9 +70,30 @@ jobs:
           load: true
           tags: festpage-${{ matrix.app }}:pr
           cache-from: type=gha,scope=${{ matrix.app }}
-      # The api image ships native modules (argon2): make sure they load in the final image.
+      # Runs the api image the way the cluster does: migrations (initContainer command),
+      # then the server against a real PostgreSQL, plus a check that argon2 loads.
       - name: Smoke test api image
         if: matrix.app == 'api'
-        run: >
-          docker run --rm -w /repo/apps/api festpage-api:pr
-          node --input-type=module -e "const a = await import('argon2'); await a.verify(await a.hash('x'), 'x'); console.log('argon2 ok')"
+        env:
+          DATABASE_URL: postgresql://festpage:festpage@localhost:5432/festpage
+        run: |
+          retry() { for i in $(seq 15); do "$@" && return 0; sleep 2; done; return 1; }
+
+          docker run -d --name pg -p 5432:5432 \
+            -e POSTGRES_USER=festpage -e POSTGRES_PASSWORD=festpage -e POSTGRES_DB=festpage \
+            postgres:18-alpine
+
+          docker run --rm -w /repo/apps/api festpage-api:pr node --input-type=module \
+            -e "const a = await import('argon2'); await a.verify(await a.hash('x'), 'x'); console.log('argon2 ok')"
+
+          retry docker run --rm --network host -w /repo/packages/db -e DATABASE_URL \
+            festpage-api:pr node_modules/.bin/prisma migrate deploy
+
+          docker run -d --name api --network host -e DATABASE_URL -e JWT_SECRET=ci festpage-api:pr
+          retry curl -fsS localhost:3001/health
+          curl -fsS localhost:3001/api/products | tee /dev/stderr | grep -q '"total":0'
+          echo "api image ok"
+
+      - name: Api container logs
+        if: failure() && matrix.app == 'api'
+        run: docker logs api || true
