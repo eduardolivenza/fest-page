@@ -28,6 +28,8 @@ ingress:
 #   sealed-secret.yaml            -> Secret "fest-descans-api": JWT_SECRET, password, postgres-password
 #                                   (also the postgresql subchart's existingSecret)
 #   sealed-ghcr-credentials.yaml  -> Secret "ghcr-credentials" (ghcr.io pull secret for web/admin/api)
+#   sealed-turnstile.yaml         -> Secret "fest-descans-api-turnstile": TURNSTILE_SECRET_KEY
+#                                   (optional: without it the contact form captcha is not enforced)
 # Rotate: kubectl create secret ... --dry-run=client -o yaml | kubeseal -o yaml > templates/<file>.yaml
 # DB passwords are only read at first init: also ALTER USER inside PostgreSQL when rotating.
 # Full guide: homelab repo, .claude/skills/homelab-secrets/SKILL.md
