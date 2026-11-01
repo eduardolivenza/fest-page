@@ -18,7 +18,7 @@
     "@festpage/db": "workspace:*",
     "@prisma/client": "^6.0.0",
     "@festpage/types": "workspace:*",
-    "argon2": "^0.41.0",
+    "argon2": "^0.45.0",
     "fastify": "^5.0.0",
     "fastify-plugin": "^5.0.0",
     "zod": "^3.23.0"
