@@ -23,7 +23,7 @@ env:
 
 jobs:
   lint:
-    name: Type check
+    name: Type check and tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +36,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
+      - run: pnpm --filter @festpage/web test
 
   version:
     name: Create version tag

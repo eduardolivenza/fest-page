@@ -3,3 +3,5 @@
 **/dist
 apps/api/src/generated
 .git
+apps/*/test
+apps/*/vitest.config.*
