@@ -1,14 +1,11 @@
 node_modules
 dist
 .next
-.turbo
-.nx/cache
 .env
 .env.local
 .env.*.local
 *.log
 coverage
-.nx/workspace-data
 .idea
 apps/api/src/generated
-.idea/**
+*.tsbuildinfo

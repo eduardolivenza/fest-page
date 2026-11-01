@@ -42,7 +42,7 @@ Only **SealedSecrets** are committed, in `helm/api/templates/sealed-*.yaml` (`fe
 
 ## Edge (Cloudflare)
 
-Tunnel routes in the homelab repo (`components/cloudflared/values.yaml`): `festdescans.com`→web:3000, `admin.`→admin:3002, `api.`→api:3001. Cloudflare provides TLS (Always HTTPS, min TLS 1.2, HSTS), Web Analytics and Turnstile. Traefik is disabled; the charts' `ingress.yaml` templates are unused.
+Tunnel routes in the homelab repo (`components/cloudflared/values.yaml`): `festdescans.com`→web:3000, `admin.`→admin:3002, `api.`→api:3001. Cloudflare provides TLS (Always HTTPS, min TLS 1.2, HSTS), Web Analytics and Turnstile. Traefik is disabled and the charts have no Ingress: cloudflared talks to the Services directly. A new hostname is a tunnel route in homelab, not an Ingress.
 
 ## Renovate
 

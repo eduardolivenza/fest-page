@@ -8,11 +8,7 @@ allowBuilds:
   prisma: true
   '@prisma/engines': true  # migration engine used by `prisma migrate deploy`
   esbuild: true          # tsx, vitest
-  nx: true
-  cpu-features: false    # optional native speed-ups pulled in by testcontainers
-  ssh2: false
-  protobufjs: false
-  '@parcel/watcher': false
+  '@parcel/watcher': false  # optional native build, pulled in by sass (via next/vite peers)
 
 # Don't let `pnpm run` start an install when node_modules looks stale (Docker build stages
 # copy node_modules between stages; CI installs explicitly with --frozen-lockfile).

@@ -1,0 +1,976 @@
+{
+  "version": "6.0",
+  "nxVersion": "20.8.4",
+  "pathMappings": {
+    "@festpage/types": [
+      "packages/types/src/index.ts"
+    ],
+    "@festpage/db": [
+      "packages/db/src/index.ts"
+    ],
+    "@festpage/ui": [
+      "packages/ui/src/index.ts"
+    ],
+    "@festpage/config/*": [
+      "packages/config/src/*"
+    ]
+  },
+  "nxJsonPlugins": [
+    {
+      "name": "@nx/next/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "devTargetName": "dev",
+        "startTargetName": "start",
+        "serveStaticTargetName": "serve-static"
+      }
+    },
+    {
+      "name": "@nx/node/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "serveTargetName": "dev",
+        "testTargetName": "test"
+      }
+    }
+  ],
+  "fileMap": {
+    "nonProjectFiles": [
+      {
+        "file": "helm/admin/templates/deployment.yaml",
+        "hash": "12646449721527816973"
+      },
+      {
+        "file": "helm/api/templates/deployment.yaml",
+        "hash": "10647520750798112920"
+      },
+      {
+        "file": "nx.json",
+        "hash": "17315033211525547141"
+      },
+      {
+        "file": "documentation/resources/FEST    (5).JPG",
+        "hash": "12246637460872912045"
+      },
+      {
+        "file": ".github/workflows/pr-checks.yml",
+        "hash": "2358432504966757352"
+      },
+      {
+        "file": ".github/workflows/ci-api.yml",
+        "hash": "9480846107824787804"
+      },
+      {
+        "file": "documentation/resources/9995 - PLAFO DONA FEST ORI.pdf",
+        "hash": "1349704841569827085"
+      },
+      {
+        "file": "documentation/resources/FEST    (1).JPG",
+        "hash": "14994183134586055462"
+      },
+      {
+        "file": "helm/web/templates/ingress.yaml",
+        "hash": "15152676430350722352"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "2213031577715503558"
+      },
+      {
+        "file": "pnpm-lock.yaml",
+        "hash": "17190485481337852303"
+      },
+      {
+        "file": "documentation/resources/FEST    (8).JPG",
+        "hash": "17380567762901079420"
+      },
+      {
+        "file": ".github/workflows/ci-admin.yml",
+        "hash": "5583311660710856049"
+      },
+      {
+        "file": "documentation/resources/IMG_8445.jpg",
+        "hash": "16441553570051733049"
+      },
+      {
+        "file": "helm/admin/Chart.yaml",
+        "hash": "18028698021768099936"
+      },
+      {
+        "file": "documentation/resources/FEST    (28).JPG",
+        "hash": "5239560554172836362"
+      },
+      {
+        "file": "documentation/resources/9995 - PLAFO PARELLA FEST ORI.pdf",
+        "hash": "2340099827865817188"
+      },
+      {
+        "file": "documentation/resources/Logo_fest_color.pdf",
+        "hash": "8798384219829297218"
+      },
+      {
+        "file": "documentation/resources/IMG_8441.jpg",
+        "hash": "8043248181822855552"
+      },
+      {
+        "file": ".prettierrc",
+        "hash": "11450766685848108030"
+      },
+      {
+        "file": ".github/workflows/ci-web.yml",
+        "hash": "8663848950962924280"
+      },
+      {
+        "file": "documentation/resources/IMG_8438.jpg",
+        "hash": "13164390810070714724"
+      },
+      {
+        "file": "helm/admin/values.yaml",
+        "hash": "13702907265118186200"
+      },
+      {
+        "file": "renovate.json",
+        "hash": "4118273891402141739"
+      },
+      {
+        "file": ".claude/commands/arch.md",
+        "hash": "8078396052619572931"
+      },
+      {
+        "file": "documentation/resources/IMG_8437.jpg",
+        "hash": "2574695161588791511"
+      },
+      {
+        "file": "helm/web/templates/deployment.yaml",
+        "hash": "16659830589028594387"
+      },
+      {
+        "file": "helm/api/charts/postgresql-13.4.4.tgz",
+        "hash": "6291202477130842438"
+      },
+      {
+        "file": ".dockerignore",
+        "hash": "9290888591866478220"
+      },
+      {
+        "file": "helm/web/values.yaml",
+        "hash": "2516213130808609666"
+      },
+      {
+        "file": "helm/web/Chart.yaml",
+        "hash": "8445181778903225840"
+      },
+      {
+        "file": "helm/api/values.yaml",
+        "hash": "6725183706309691544"
+      },
+      {
+        "file": ".claude/commands/arch-api.md",
+        "hash": "13136211638639581144"
+      },
+      {
+        "file": "helm/admin/templates/ingress.yaml",
+        "hash": "15152676430350722352"
+      },
+      {
+        "file": "helm/api/templates/sealed-secret.yaml",
+        "hash": "18108280702403619151"
+      },
+      {
+        "file": "helm/api/templates/ingress.yaml",
+        "hash": "15152676430350722352"
+      },
+      {
+        "file": ".claude/commands/arch-i18n.md",
+        "hash": "6418257448307872003"
+      },
+      {
+        "file": "helm/api/Chart.lock",
+        "hash": "16530277581181115671"
+      },
+      {
+        "file": "documentation/resources/Fest-Descans-1.jpg",
+        "hash": "6068996436358250171"
+      },
+      {
+        "file": "documentation/resources/IMG_8443.jpg",
+        "hash": "2075543716780116480"
+      },
+      {
+        "file": "package.json",
+        "hash": "6650659091176667661"
+      },
+      {
+        "file": "helm/api/templates/sealed-turnstile.yaml",
+        "hash": "3099743725463858686"
+      },
+      {
+        "file": "docker-compose.yml",
+        "hash": "17935587443454469870"
+      },
+      {
+        "file": "helm/api/templates/sealed-ghcr-credentials.yaml",
+        "hash": "13358912962127443794"
+      },
+      {
+        "file": "helm/api/Chart.yaml",
+        "hash": "3644799390873229096"
+      },
+      {
+        "file": "pnpm-workspace.yaml",
+        "hash": "2373171212127886927"
+      },
+      {
+        "file": "tsconfig.base.json",
+        "hash": "8601839740680404111"
+      },
+      {
+        "file": ".claude/commands/arch-frontend.md",
+        "hash": "14175623257747221779"
+      },
+      {
+        "file": ".env.example",
+        "hash": "12208360573039198462"
+      },
+      {
+        "file": "documentation/resources/9995 - PLAFO BEBE FEST ORI.pdf",
+        "hash": "10921061216141720890"
+      }
+    ],
+    "projectFileMap": {
+      "@festpage/admin": [
+        {
+          "file": "apps/admin/Dockerfile",
+          "hash": "16955116299784491965"
+        },
+        {
+          "file": "apps/admin/next-env.d.ts",
+          "hash": "2517811901510882550"
+        },
+        {
+          "file": "apps/admin/next.config.ts",
+          "hash": "16466578809765639919",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/admin/package.json",
+          "hash": "8154104402922432536",
+          "deps": [
+            "@festpage/config",
+            "npm:@testing-library/dom",
+            "npm:@testing-library/react",
+            "npm:@types/react",
+            "npm:@types/react-dom",
+            "npm:autoprefixer",
+            "npm:jsdom",
+            "npm:postcss@8.5.32",
+            "npm:tailwindcss",
+            "npm:typescript",
+            "npm:vitest",
+            "@festpage/types",
+            "@festpage/ui",
+            "npm:next",
+            "npm:react@19.3.1",
+            "npm:react-dom@19.3.1"
+          ]
+        },
+        {
+          "file": "apps/admin/postcss.config.js",
+          "hash": "12138717901045904405"
+        },
+        {
+          "file": "apps/admin/public/LOGO_fest.png",
+          "hash": "3036496187002300058"
+        },
+        {
+          "file": "apps/admin/public/Logo.PNG",
+          "hash": "12007864692598791581"
+        },
+        {
+          "file": "apps/admin/src/app/dashboard/contacts/page.tsx",
+          "hash": "10485460596112311595",
+          "deps": [
+            "npm:react@19.3.1",
+            "@festpage/ui",
+            "@festpage/types"
+          ]
+        },
+        {
+          "file": "apps/admin/src/app/dashboard/layout.tsx",
+          "hash": "16123353249893133701",
+          "deps": [
+            "npm:react@19.3.1",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/admin/src/app/dashboard/orders/page.tsx",
+          "hash": "4511767775149100188",
+          "deps": [
+            "npm:react@19.3.1",
+            "@festpage/ui",
+            "@festpage/types"
+          ]
+        },
+        {
+          "file": "apps/admin/src/app/dashboard/page.tsx",
+          "hash": "17670198340809758404",
+          "deps": [
+            "npm:react@19.3.1",
+            "@festpage/ui",
+            "@festpage/types"
+          ]
+        },
+        {
+          "file": "apps/admin/src/app/dashboard/products/[id]/edit/page.tsx",
+          "hash": "6443566605706596784",
+          "deps": [
+            "npm:react@19.3.1",
+            "npm:next",
+            "@festpage/ui",
+            "@festpage/types"
+          ]
+        },
+        {
+          "file": "apps/admin/src/app/dashboard/products/new/page.tsx",
+          "hash": "14731989070386179193",
+          "deps": [
+            "npm:next",
+            "npm:react@19.3.1",
+            "@festpage/ui"
+          ]
+        },
+        {
+          "file": "apps/admin/src/app/dashboard/products/page.tsx",
+          "hash": "9253601845876258961",
+          "deps": [
+            "npm:react@19.3.1",
+            "npm:next",
+            "@festpage/ui",
+            "@festpage/types"
+          ]
+        },
+        {
+          "file": "apps/admin/src/app/globals.css",
+          "hash": "14360007473237977717"
+        },
+        {
+          "file": "apps/admin/src/app/layout.tsx",
+          "hash": "2882601748790670199",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/admin/src/app/login/page.tsx",
+          "hash": "3321528977541313339",
+          "deps": [
+            "npm:react@19.3.1",
+            "npm:next",
+            "@festpage/ui"
+          ]
+        },
+        {
+          "file": "apps/admin/src/app/page.tsx",
+          "hash": "4274458913880518343",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/admin/src/components/SizesEditor.tsx",
+          "hash": "16267801936738293184",
+          "deps": [
+            "npm:react@19.3.1"
+          ]
+        },
+        {
+          "file": "apps/admin/src/lib/api.ts",
+          "hash": "11639922051687587589"
+        },
+        {
+          "file": "apps/admin/tailwind.config.ts",
+          "hash": "17378428828004611388",
+          "deps": [
+            "npm:tailwindcss",
+            "@festpage/config"
+          ]
+        },
+        {
+          "file": "apps/admin/test/api.test.ts",
+          "hash": "11250597590312238774",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "apps/admin/test/contacts.test.tsx",
+          "hash": "8287834814748873242",
+          "deps": [
+            "npm:vitest",
+            "npm:@testing-library/react"
+          ]
+        },
+        {
+          "file": "apps/admin/tsconfig.json",
+          "hash": "9794989177025839985"
+        },
+        {
+          "file": "apps/admin/tsconfig.tsbuildinfo",
+          "hash": "9887069564856067508"
+        },
+        {
+          "file": "apps/admin/vitest.config.mts",
+          "hash": "14200478560949916524",
+          "deps": [
+            "npm:vitest"
+          ]
+        }
+      ],
+      "@festpage/ui": [
+        {
+          "file": "packages/ui/package.json",
+          "hash": "7595783045006400665",
+          "deps": [
+            "npm:react@19.2.6",
+            "npm:react-dom@19.2.6",
+            "npm:@types/react",
+            "npm:tailwindcss"
+          ]
+        },
+        {
+          "file": "packages/ui/src/components/Badge.tsx",
+          "hash": "6983865344010941467",
+          "deps": [
+            "npm:react@19.2.6"
+          ]
+        },
+        {
+          "file": "packages/ui/src/components/Button.tsx",
+          "hash": "7386843993609047878",
+          "deps": [
+            "npm:react@19.2.6"
+          ]
+        },
+        {
+          "file": "packages/ui/src/components/Card.tsx",
+          "hash": "7778003061348089942",
+          "deps": [
+            "npm:react@19.2.6"
+          ]
+        },
+        {
+          "file": "packages/ui/src/components/ProductCard.tsx",
+          "hash": "18435005941378621611",
+          "deps": [
+            "@festpage/types"
+          ]
+        },
+        {
+          "file": "packages/ui/src/components/Spinner.tsx",
+          "hash": "2263661845190455471"
+        },
+        {
+          "file": "packages/ui/src/index.ts",
+          "hash": "15651515856608474154"
+        }
+      ],
+      "@festpage/types": [
+        {
+          "file": "packages/types/package.json",
+          "hash": "1520443074757104493"
+        },
+        {
+          "file": "packages/types/src/index.ts",
+          "hash": "3721120267738177889"
+        }
+      ],
+      "@festpage/config": [
+        {
+          "file": "packages/config/package.json",
+          "hash": "5152852681206170094"
+        },
+        {
+          "file": "packages/config/src/eslint-preset.js",
+          "hash": "10081236426170733421"
+        },
+        {
+          "file": "packages/config/src/tailwind-preset.js",
+          "hash": "13093413973804366578"
+        },
+        {
+          "file": "packages/config/tsconfig.base.json",
+          "hash": "10248009443664204963"
+        }
+      ],
+      "@festpage/api": [
+        {
+          "file": "apps/api/Dockerfile",
+          "hash": "16016529551699557466"
+        },
+        {
+          "file": "apps/api/package.json",
+          "hash": "9378871737031853600",
+          "deps": [
+            "npm:@types/node",
+            "npm:testcontainers",
+            "npm:tsx",
+            "npm:typescript",
+            "npm:vitest",
+            "npm:@fastify/cors",
+            "npm:@fastify/jwt",
+            "npm:@fastify/swagger",
+            "npm:@fastify/swagger-ui",
+            "@festpage/db",
+            "@festpage/types",
+            "npm:@prisma/adapter-pg",
+            "npm:@prisma/client",
+            "npm:argon2",
+            "npm:fastify",
+            "npm:fastify-plugin@5.1.0",
+            "npm:zod"
+          ]
+        },
+        {
+          "file": "apps/api/src/app.ts",
+          "hash": "14661305767600963540",
+          "deps": [
+            "npm:fastify",
+            "npm:@fastify/cors",
+            "npm:@fastify/jwt",
+            "npm:@fastify/swagger",
+            "npm:@fastify/swagger-ui"
+          ]
+        },
+        {
+          "file": "apps/api/src/index.ts",
+          "hash": "2705058992524390437"
+        },
+        {
+          "file": "apps/api/src/lib/turnstile.ts",
+          "hash": "12938222673204514017"
+        },
+        {
+          "file": "apps/api/src/plugins/auth.ts",
+          "hash": "2158980719181592439",
+          "deps": [
+            "npm:fastify-plugin@5.1.0",
+            "npm:fastify"
+          ]
+        },
+        {
+          "file": "apps/api/src/plugins/prisma.ts",
+          "hash": "12312575161158122264",
+          "deps": [
+            "npm:fastify-plugin@5.1.0",
+            "npm:@prisma/adapter-pg"
+          ]
+        },
+        {
+          "file": "apps/api/src/routes/admin/auth.ts",
+          "hash": "8841524980887538046",
+          "deps": [
+            "npm:fastify",
+            "npm:argon2",
+            "npm:zod"
+          ]
+        },
+        {
+          "file": "apps/api/src/routes/admin/contacts.ts",
+          "hash": "16485765730879248908",
+          "deps": [
+            "npm:fastify"
+          ]
+        },
+        {
+          "file": "apps/api/src/routes/admin/orders.ts",
+          "hash": "12650926175371659834",
+          "deps": [
+            "npm:fastify"
+          ]
+        },
+        {
+          "file": "apps/api/src/routes/admin/products.ts",
+          "hash": "6060197895143653814",
+          "deps": [
+            "npm:fastify",
+            "npm:zod"
+          ]
+        },
+        {
+          "file": "apps/api/src/routes/contacts.ts",
+          "hash": "14226242432689559941",
+          "deps": [
+            "npm:fastify",
+            "npm:zod"
+          ]
+        },
+        {
+          "file": "apps/api/src/routes/orders.ts",
+          "hash": "5673045343311613156",
+          "deps": [
+            "npm:fastify",
+            "npm:zod"
+          ]
+        },
+        {
+          "file": "apps/api/src/routes/products.ts",
+          "hash": "7730226102241707439",
+          "deps": [
+            "npm:fastify"
+          ]
+        },
+        {
+          "file": "apps/api/test/admin.test.ts",
+          "hash": "12223052673688484700",
+          "deps": [
+            "npm:vitest",
+            "npm:fastify",
+            "npm:argon2"
+          ]
+        },
+        {
+          "file": "apps/api/test/helpers.ts",
+          "hash": "1079019147688611447",
+          "deps": [
+            "npm:vitest",
+            "npm:fastify-plugin@5.1.0",
+            "npm:fastify"
+          ]
+        },
+        {
+          "file": "apps/api/test/public.test.ts",
+          "hash": "17098938530430540292",
+          "deps": [
+            "npm:vitest",
+            "npm:fastify"
+          ]
+        },
+        {
+          "file": "apps/api/tsconfig.json",
+          "hash": "7636284829995126067"
+        },
+        {
+          "file": "apps/api/vitest.config.ts",
+          "hash": "9006483702368434623",
+          "deps": [
+            "npm:vitest"
+          ]
+        }
+      ],
+      "@festpage/db": [
+        {
+          "file": "packages/db/package.json",
+          "hash": "14597638317577474106",
+          "deps": [
+            "npm:prisma",
+            "npm:testcontainers",
+            "npm:tsx",
+            "npm:@prisma/adapter-pg",
+            "npm:@prisma/client",
+            "npm:dotenv@17.4.2"
+          ]
+        },
+        {
+          "file": "packages/db/prisma.config.ts",
+          "hash": "13425252583052405490",
+          "deps": [
+            "npm:dotenv@17.4.2",
+            "npm:prisma"
+          ]
+        },
+        {
+          "file": "packages/db/prisma/migrations/20260524132142_test_1/migration.sql",
+          "hash": "8505045451615869178"
+        },
+        {
+          "file": "packages/db/prisma/migrations/20260524133555_v2/migration.sql",
+          "hash": "11068670118750956631"
+        },
+        {
+          "file": "packages/db/prisma/migrations/20260525081137_v3/migration.sql",
+          "hash": "7603166711593717779"
+        },
+        {
+          "file": "packages/db/prisma/migrations/migration_lock.toml",
+          "hash": "872437952673290735"
+        },
+        {
+          "file": "packages/db/prisma/schema.prisma",
+          "hash": "10606941123481462676"
+        },
+        {
+          "file": "packages/db/src/seed.ts",
+          "hash": "5429828255029108482",
+          "deps": [
+            "npm:dotenv@17.4.2",
+            "npm:@prisma/adapter-pg",
+            "npm:argon2",
+            "@festpage/api"
+          ]
+        },
+        {
+          "file": "packages/db/src/test-container.ts",
+          "hash": "6495932046461300256",
+          "deps": [
+            "npm:testcontainers"
+          ]
+        }
+      ],
+      "@festpage/web": [
+        {
+          "file": "apps/web/Dockerfile",
+          "hash": "2069342917295699151"
+        },
+        {
+          "file": "apps/web/next-env.d.ts",
+          "hash": "2517811901510882550"
+        },
+        {
+          "file": "apps/web/next.config.ts",
+          "hash": "10939136369371687611",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/web/package.json",
+          "hash": "10832164790956620213",
+          "deps": [
+            "@festpage/config",
+            "npm:@testing-library/dom",
+            "npm:@testing-library/react",
+            "npm:@types/react",
+            "npm:@types/react-dom",
+            "npm:autoprefixer",
+            "npm:jsdom",
+            "npm:postcss@8.5.32",
+            "npm:tailwindcss",
+            "npm:typescript",
+            "npm:vitest",
+            "@festpage/types",
+            "@festpage/ui",
+            "npm:next",
+            "npm:react@19.3.1",
+            "npm:react-dom@19.3.1"
+          ]
+        },
+        {
+          "file": "apps/web/postcss.config.js",
+          "hash": "8055263870272897227"
+        },
+        {
+          "file": "apps/web/public/.well-known/security.txt",
+          "hash": "8298978671859624205"
+        },
+        {
+          "file": "apps/web/public/LOGO_fest.png",
+          "hash": "3036496187002300058"
+        },
+        {
+          "file": "apps/web/public/LOGO_fest.png:Zone.Identifier",
+          "hash": "6175566146444302201"
+        },
+        {
+          "file": "apps/web/public/Logo.PNG",
+          "hash": "12007864692598791581"
+        },
+        {
+          "file": "apps/web/public/store/brand.jpg",
+          "hash": "6068996436358250171"
+        },
+        {
+          "file": "apps/web/public/store/facade-1.jpg",
+          "hash": "14994183134586055462"
+        },
+        {
+          "file": "apps/web/public/store/facade-2.jpg",
+          "hash": "12246637460872912045"
+        },
+        {
+          "file": "apps/web/public/store/interior-1.jpg",
+          "hash": "17380567762901079420"
+        },
+        {
+          "file": "apps/web/public/store/interior-2.jpg",
+          "hash": "5239560554172836362"
+        },
+        {
+          "file": "apps/web/public/store/interior-3.jpg",
+          "hash": "2574695161588791511"
+        },
+        {
+          "file": "apps/web/public/store/interior-4.jpg",
+          "hash": "13164390810070714724"
+        },
+        {
+          "file": "apps/web/public/store/interior-5.jpg",
+          "hash": "8043248181822855552"
+        },
+        {
+          "file": "apps/web/public/store/interior-6.jpg",
+          "hash": "2075543716780116480"
+        },
+        {
+          "file": "apps/web/public/store/interior-7.jpg",
+          "hash": "16441553570051733049"
+        },
+        {
+          "file": "apps/web/src/app/_components/HomeContent.tsx",
+          "hash": "17162586005065239023",
+          "deps": [
+            "npm:react@19.3.1",
+            "npm:next",
+            "@festpage/ui",
+            "@festpage/types"
+          ]
+        },
+        {
+          "file": "apps/web/src/app/contact/page.tsx",
+          "hash": "3963356264537769393",
+          "deps": [
+            "npm:react@19.3.1",
+            "@festpage/ui"
+          ]
+        },
+        {
+          "file": "apps/web/src/app/globals.css",
+          "hash": "8802147526003456020"
+        },
+        {
+          "file": "apps/web/src/app/layout.tsx",
+          "hash": "4474305161604779073",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/web/src/app/page.tsx",
+          "hash": "17191326422827016511"
+        },
+        {
+          "file": "apps/web/src/app/products/[slug]/_components/ProductDetail.tsx",
+          "hash": "14665454463030323450",
+          "deps": [
+            "npm:react@19.3.1",
+            "npm:next",
+            "@festpage/types",
+            "@festpage/ui"
+          ]
+        },
+        {
+          "file": "apps/web/src/app/products/[slug]/page.tsx",
+          "hash": "757331877742380336"
+        },
+        {
+          "file": "apps/web/src/app/products/_components/ProductsContent.tsx",
+          "hash": "7675870134713729479",
+          "deps": [
+            "npm:react@19.3.1",
+            "npm:next",
+            "@festpage/ui",
+            "@festpage/types"
+          ]
+        },
+        {
+          "file": "apps/web/src/app/products/page.tsx",
+          "hash": "683020716929814991",
+          "deps": [
+            "npm:next",
+            "npm:react@19.3.1"
+          ]
+        },
+        {
+          "file": "apps/web/src/components/Footer.tsx",
+          "hash": "13339183266556311211",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/web/src/components/LanguageSwitcher.tsx",
+          "hash": "3820558037241509025"
+        },
+        {
+          "file": "apps/web/src/components/Navbar.tsx",
+          "hash": "11581859749080331272",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/web/src/components/Turnstile.tsx",
+          "hash": "4671965380687874952",
+          "deps": [
+            "npm:react@19.3.1"
+          ]
+        },
+        {
+          "file": "apps/web/src/i18n/index.tsx",
+          "hash": "11849111443700617662",
+          "deps": [
+            "npm:react@19.3.1"
+          ]
+        },
+        {
+          "file": "apps/web/src/i18n/messages.ts",
+          "hash": "16861767052921349705"
+        },
+        {
+          "file": "apps/web/src/lib/api.ts",
+          "hash": "5787880375262628610",
+          "deps": [
+            "@festpage/types"
+          ]
+        },
+        {
+          "file": "apps/web/tailwind.config.ts",
+          "hash": "17378428828004611388",
+          "deps": [
+            "npm:tailwindcss",
+            "@festpage/config"
+          ]
+        },
+        {
+          "file": "apps/web/test/api.test.ts",
+          "hash": "1475239771234494296",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "apps/web/test/contact.test.tsx",
+          "hash": "17527433557484153911",
+          "deps": [
+            "npm:vitest",
+            "npm:@testing-library/react"
+          ]
+        },
+        {
+          "file": "apps/web/test/messages.test.ts",
+          "hash": "15912122633785123637",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "apps/web/tsconfig.json",
+          "hash": "9794989177025839985"
+        },
+        {
+          "file": "apps/web/tsconfig.tsbuildinfo",
+          "hash": "7459856905794342192"
+        },
+        {
+          "file": "apps/web/vitest.config.mts",
+          "hash": "14200478560949916524",
+          "deps": [
+            "npm:vitest"
+          ]
+        }
+      ]
+    }
+  }
+}

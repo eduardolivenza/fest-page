@@ -47,8 +47,6 @@ spec:
           env:
             - name: NODE_ENV
               value: production
-            - name: API_URL
-              value: {{ .Values.apiUrl | quote }}
           readinessProbe:
             httpGet:
               path: /

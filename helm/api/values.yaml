@@ -16,13 +16,6 @@ resources:
 cors:
   webUrl: https://festdescans.com
   adminUrl: https://admin.festdescans.com
-ingress:
-  className: traefik
-  host: api.festdescans.com
-  tls:
-    enabled: false
-    secretName: fest-descans-api-tls
-    clusterIssuer: letsencrypt-prod
 # Secrets are SealedSecrets in templates/ (encrypted for the homelab cluster's
 # sealed-secrets controller, safe to commit):
 #   sealed-secret.yaml            -> Secret "fest-descans-api": JWT_SECRET, password, postgres-password
