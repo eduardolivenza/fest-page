@@ -34,7 +34,7 @@ jobs:
           version: 9.15.9
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 26
           cache: pnpm
 
       # Fails on a stale or badly merged lockfile (e.g. two Renovate PRs merged back to back).
