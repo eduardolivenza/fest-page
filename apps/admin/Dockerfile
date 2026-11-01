@@ -1,7 +1,8 @@
-FROM node:20-alpine AS base
+FROM node:26.13.0-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+# Keep in sync with "packageManager" in package.json. Corepack is not bundled with Node 25+.
+RUN npm install -g pnpm@12.16.1
 
 FROM base AS deps
 WORKDIR /repo
@@ -11,7 +12,7 @@ COPY packages/ui/package.json packages/ui/
 COPY packages/config/package.json packages/config/
 COPY packages/config/src packages/config/src
 COPY apps/admin/package.json apps/admin/
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --store-dir /pnpm/store
 
 FROM base AS builder
 WORKDIR /repo

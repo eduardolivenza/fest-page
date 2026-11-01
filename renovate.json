@@ -5,13 +5,26 @@
   ],
   "packageRules": [
     {
+      "description": "pnpm 12 rejects packages younger than 1 day (minimumReleaseAge); wait longer before proposing updates",
+      "matchDatasources": [
+        "npm"
+      ],
+      "minimumReleaseAge": "3 days"
+    },
+    {
       "description": "The Prisma CLI, client and adapter must stay on the same version",
       "groupName": "prisma",
-      "matchPackageNames": ["prisma", "@prisma/client", "@prisma/adapter-pg"]
+      "matchPackageNames": [
+        "prisma",
+        "@prisma/client",
+        "@prisma/adapter-pg"
+      ]
     },
     {
       "description": "Major upgrades need code changes: only open a PR when approved in the Dependency Dashboard",
-      "matchUpdateTypes": ["major"],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "dependencyDashboardApproval": true
     }
   ]
