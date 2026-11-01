@@ -59,4 +59,9 @@ pnpm check:versions --latest   # + recommended latest releases from nodejs.org a
   - `types` defaults to `[]`: code that uses Node globals declares `"types": ["node"]` (api). `strict`, `esModuleInterop` are always on.
   - **No JS compiler API in 7.0** (`import ts from 'typescript'` fails). `next build` type-checks through the `tsc` CLI (Next's default, `experimental.useTypeScriptCli`), so it works. If a new tool needs the API (typescript-eslint, ts-node, …), install TypeScript 6 side by side as the docs recommend: `"@typescript/native": "npm:typescript@^7"` + `"typescript": "npm:@typescript/typescript6@^6"`.
   - Editors: Next's TS language-service plugin may not load under the TS 7 language server; in VS Code "Disable TypeScript 7 Language Server" falls back to the editor's bundled TS.
-- Majors with known breaking changes, not yet adopted: Vitest 5, Tailwind 4, Zod 4. Treat each as its own planned upgrade.
+- **Vitest 5** (runs on Vite 8, installed automatically as a peer):
+  - JSX in web/admin tests is compiled by **oxc**, not esbuild: `oxc: { jsx: { runtime: 'automatic' } }` in `vitest.config.mts` (Next's tsconfig says `"jsx": "preserve"`; without the override test files with JSX fail to parse). The old `esbuild` option is ignored.
+  - `clearMocks` is on by default (mock call history is cleared before every test); `mockReset` restores a `vi.fn(impl)` to `impl`.
+  - `vi.mock`/`vi.hoisted` must be at module top level (inside a function or test it now throws); `expect(...).resolves/.rejects` must be awaited or the test fails.
+  - Requires Node >= 22.12.
+- Majors with known breaking changes, not yet adopted: Tailwind 4, Zod 4. Treat each as its own planned upgrade.
