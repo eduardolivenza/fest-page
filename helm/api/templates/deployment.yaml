@@ -90,6 +90,12 @@ spec:
                 secretKeyRef:
                   name: {{ .Release.Name }}
                   key: JWT_SECRET
+            - name: TURNSTILE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-turnstile
+                  key: TURNSTILE_SECRET_KEY
+                  optional: true
             - name: WEB_URL
               value: {{ .Values.cors.webUrl | quote }}
             - name: ADMIN_URL

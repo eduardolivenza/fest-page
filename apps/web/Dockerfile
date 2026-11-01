@@ -26,6 +26,9 @@ COPY tsconfig.base.json .
 WORKDIR /repo/apps/web
 ARG NEXT_PUBLIC_API_URL=http://api-service:3001
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+# Public Turnstile site key; empty disables the captcha on the contact form
+ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY=
+ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
 RUN pnpm run build
 
 FROM base AS runner

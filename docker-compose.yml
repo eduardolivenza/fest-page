@@ -25,6 +25,8 @@ services:
       WEB_URL: http://localhost:3000
       ADMIN_URL: http://localhost:3002
       NODE_ENV: development
+      # Cloudflare's always-pass test secret
+      TURNSTILE_SECRET_KEY: 1x0000000000000000000000000000000AA
     ports:
       - '3001:3001'
     depends_on:
@@ -37,6 +39,8 @@ services:
       dockerfile: apps/web/Dockerfile
       args:
         NEXT_PUBLIC_API_URL: http://localhost:3001
+        # Cloudflare's always-pass test site key
+        NEXT_PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:3001
     ports:

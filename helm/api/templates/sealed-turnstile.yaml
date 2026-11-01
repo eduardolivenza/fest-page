@@ -1,0 +1,16 @@
+# Secret fest-descans-api-turnstile (TURNSTILE_SECRET_KEY). Sealed for the homelab cluster.
+# Rotate with kubeseal (see homelab repo, homelab-secrets skill). Never commit plaintext.
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: fest-descans-api-turnstile
+  namespace: fest-descans
+spec:
+  encryptedData:
+    TURNSTILE_SECRET_KEY: AgAiI5LjmYstdPSZWpFPHUttGkaJtncXVskCX/StJIx5FQZgvIO1QNUIiOjBMqp1XOLjTn87G0kaEihHDQq8gARFEnOn07zwYV+dUyIag7QnweXsJdfArHcBcA/FK0C//9QAf9r+MyVzLeNmgyi/rabwfmEUlpfxs9Xogn+u4rRcmRvUJliuXNOm50apntYt8dBzQiYestKTfEBqeW7uEMZx4cA2cgWbgAZSBuRj6N0f7m6/DRvmj9cyqZvGkEDOy26FZdcumaWr/8cv7nn7m/QBIla27Xm4SJjvJdK0vbbHBAop1rrhfyFVBiR9JgL3Nd8akdU1bw3YbiaWWRQGIjN3cpiD1QO552Zp/PO6kYwH5TPAeVzqcYeCkMUH8ElPStoz2JJRXGPh3SL/RY8tx83fnp+me/AEgf50fIDew7uxaqtzxatUv2Bz8po3ymH8YZWy7Y5npKSzBWHb6oqn4zrNCKrB0NAaD6yJwvEg/LjkCeoDgh4AfL8QwIfKhypS/G1yw+R19X4O2ULpkcEowaD6A38tUl/+kO6Zy+RouJhtppTBT36t45GMZSTMM7qtOLeSIyobbUDEjNViEEHRYtQgnLgwM+E1vRO+4VO4Vemm3nbEwXQoy2709O2R6MupnH7QGksZ/MXGl4xF5cg3m2V0VUKWAXBpSu+rcg0Q49c/6y+oul32DFNOAyTTZxB+IF7lI6v+QX6eD9RqZYT08oOc5V7I4lvcufjzvlewEyd6Y5VdnQ==
+  template:
+    metadata:
+      name: fest-descans-api-turnstile
+      namespace: fest-descans
+    type: Opaque

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Button } from '@festpage/ui';
 import { useT } from '@/i18n';
+import { Turnstile, TURNSTILE_SITE_KEY, type TurnstileHandle } from '@/components/Turnstile';
 
 const STORE = {
   address: 'Carrer Lluís Homs, 3',
@@ -18,6 +19,8 @@ export default function ContactPage() {
   const { t } = useT();
   const c = t.contact;
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileHandle>(null);
 
   const hours = [
     { days: c.hours.weekdays, time: '10:00 – 14:00 / 16:30 – 20:00' },
@@ -35,6 +38,7 @@ export default function ContactPage() {
       email: formData.get('email'),
       phone: formData.get('phone') || undefined,
       message: formData.get('message'),
+      turnstileToken: turnstileToken ?? undefined,
     };
 
     try {
@@ -49,9 +53,11 @@ export default function ContactPage() {
         (e.target as HTMLFormElement).reset();
       } else {
         setStatus('error');
+        turnstileRef.current?.reset();
       }
     } catch {
       setStatus('error');
+      turnstileRef.current?.reset();
     }
   }
 
@@ -141,10 +147,16 @@ export default function ContactPage() {
                     className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
                   />
                 </div>
+                {TURNSTILE_SITE_KEY && <Turnstile ref={turnstileRef} onToken={setTurnstileToken} />}
                 {status === 'error' && (
                   <p className="text-sm text-red-600">{c.form.error}</p>
                 )}
-                <Button type="submit" loading={status === 'sending'} className="w-full">
+                <Button
+                  type="submit"
+                  loading={status === 'sending'}
+                  disabled={Boolean(TURNSTILE_SITE_KEY) && !turnstileToken}
+                  className="w-full"
+                >
                   {c.form.send}
                 </Button>
               </form>
