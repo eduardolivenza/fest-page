@@ -2,5 +2,17 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
+  ],
+  "packageRules": [
+    {
+      "description": "The Prisma CLI, client and adapter must stay on the same version",
+      "groupName": "prisma",
+      "matchPackageNames": ["prisma", "@prisma/client", "@prisma/adapter-pg"]
+    },
+    {
+      "description": "Major upgrades need code changes: only open a PR when approved in the Dependency Dashboard",
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    }
   ]
 }

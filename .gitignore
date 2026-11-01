@@ -10,3 +10,5 @@ dist
 coverage
 .nx/workspace-data
 .idea
+apps/api/src/generated
+.idea/**
