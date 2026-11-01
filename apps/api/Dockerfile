@@ -4,6 +4,9 @@ ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
 FROM base AS deps
+# Toolchain for native modules whose prebuilt binary does not load on Alpine
+# (argon2 >= 0.45 falls back to node-gyp). Build stage only: not in the runner image.
+RUN apk add --no-cache python3 make g++
 WORKDIR /repo
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY packages/types/package.json packages/types/

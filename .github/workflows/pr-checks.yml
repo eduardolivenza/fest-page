@@ -1,10 +1,11 @@
 name: PR checks
 
-# Gate for merging into main: install, typecheck, test and build every app.
+# Gate for merging into main: install, typecheck, test and build every app, and build the Docker images.
 # Runs on every PR (no path filter) so the required "Checks" status always reports;
 # a path-filtered required check would stay pending forever on PRs it skips.
 #
-# Make it required: Settings → Rules → Rulesets → main → "Require status checks to pass" → "Checks".
+# Make it required: Settings → Rules → Rulesets → main → "Require status checks to pass" →
+# "Checks", "Image (api)", "Image (web)", "Image (admin)".
 
 on:
   pull_request:
@@ -48,3 +49,30 @@ jobs:
 
       - name: Build
         run: pnpm --filter "./apps/*" run build
+
+  images:
+    name: Image (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [api, web, admin]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      # Build only (no push): catches Dockerfile and native-module breakage before merge.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/${{ matrix.app }}/Dockerfile
+          push: false
+          load: true
+          tags: festpage-${{ matrix.app }}:pr
+          cache-from: type=gha,scope=${{ matrix.app }}
+      # The api image ships native modules (argon2): make sure they load in the final image.
+      - name: Smoke test api image
+        if: matrix.app == 'api'
+        run: >
+          docker run --rm -w /repo/apps/api festpage-api:pr
+          node --input-type=module -e "const a = await import('argon2'); await a.verify(await a.hash('x'), 'x'); console.log('argon2 ok')"
