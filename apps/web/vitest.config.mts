@@ -4,7 +4,8 @@ import { defineConfig } from 'vitest/config';
 const path = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 
 export default defineConfig({
-  esbuild: { jsx: 'automatic' },
+  // Next's tsconfig has "jsx": "preserve"; tests need JSX compiled (Vite 8 transforms with oxc).
+  oxc: { jsx: { runtime: 'automatic' } },
   resolve: {
     alias: {
       '@/': path('./src/'),
