@@ -63,7 +63,7 @@ jobs:
         app: [api, web, admin]
     steps:
       - uses: actions/checkout@v7
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
       # Build only (no push): catches Dockerfile and native-module breakage before merge.
       - uses: docker/build-push-action@v7
         with:
