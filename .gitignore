@@ -9,4 +9,5 @@ dist
 *.log
 coverage
 .nx/workspace-data
-.idea
+.ideaapps/api/src/generated
+.idea/**

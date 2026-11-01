@@ -5,9 +5,9 @@
   ],
   "packageRules": [
     {
-      "description": "The Prisma CLI and client must stay on the same version",
+      "description": "The Prisma CLI, client and adapter must stay on the same version",
       "groupName": "prisma",
-      "matchPackageNames": ["prisma", "@prisma/client"]
+      "matchPackageNames": ["prisma", "@prisma/client", "@prisma/adapter-pg"]
     },
     {
       "description": "Major upgrades need code changes: only open a PR when approved in the Dependency Dashboard",

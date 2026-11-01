@@ -9,6 +9,7 @@ COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY packages/types/package.json packages/types/
 COPY packages/db/package.json packages/db/
 COPY packages/db/prisma packages/db/prisma
+COPY packages/db/prisma.config.ts packages/db/
 COPY apps/api/package.json apps/api/
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
@@ -22,6 +23,7 @@ COPY packages/types packages/types
 COPY packages/db packages/db
 COPY apps/api apps/api
 COPY tsconfig.base.json .
+RUN pnpm --filter @festpage/db run generate
 WORKDIR /repo/apps/api
 RUN pnpm run build
 
@@ -34,6 +36,7 @@ COPY --from=deps /repo/apps/api/node_modules apps/api/node_modules
 COPY --from=deps /repo/packages/db/node_modules packages/db/node_modules
 COPY --from=builder /repo/apps/api/dist apps/api/dist
 COPY --from=builder /repo/packages/db/prisma packages/db/prisma
+COPY --from=builder /repo/packages/db/prisma.config.ts packages/db/package.json packages/db/
 RUN addgroup -g 1001 -S nodejs && adduser -S appuser -u 1001
 USER appuser
 EXPOSE 3001

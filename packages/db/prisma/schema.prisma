@@ -1,10 +1,14 @@
+// The client is generated into the api, its only runtime consumer, and compiled with it.
 generator client {
-  provider = "prisma-client-js"
+  provider            = "prisma-client"
+  output              = "../../../apps/api/src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
 }
 
+// The connection URL lives in prisma.config.ts.
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum ProductCategory {

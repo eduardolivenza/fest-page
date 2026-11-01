@@ -1,5 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../../generated/prisma/client.js';
 
 export const adminContactsRoutes: FastifyPluginAsync = async (app) => {
   app.addHook('preHandler', app.authenticate);
