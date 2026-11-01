@@ -1,3 +1,8 @@
+---
+name: arch-i18n
+description: How Catalan/Spanish translations work in the FestPage public site (apps/web) — the single messages file, the useT() hook, the language switcher, and the trade-offs (no URL locales, Catalan metadata). Use when adding or changing any user-visible text in apps/web.
+---
+
 # FestPage — i18n Architecture
 
 Languages supported: **Catalan (ca)** — default, **Spanish (es)**.
@@ -22,7 +27,7 @@ messages.ca / messages.es
   product     — category labels, stock, sizes, CTA
 ```
 
-Adding a new string: add it to **both** `ca` and `es` objects in `messages.ts`. TypeScript enforces structural parity via `as const` + `Messages` type alias.
+Adding a new string: add it to **both** `ca` and `es` objects in `messages.ts`. The `Messages` type is the Catalan shape, so missing Spanish keys are not always a type error: the test `apps/web/test/messages.test.ts` checks that both languages have exactly the same keys and no empty strings. Run `pnpm --filter @festpage/web test`.
 
 ## Context + hook
 
@@ -30,7 +35,7 @@ Adding a new string: add it to **both** `ca` and `es` objects in `messages.ts`. 
 apps/web/src/i18n/index.tsx
 ```
 
-- `<LanguageProvider>` — wraps the entire app in `layout.tsx`. Reads locale from `localStorage` on mount. Updates `<html lang>` attribute reactively.
+- `<LanguageProvider>` — wraps the entire app in `layout.tsx`. Reads locale from `localStorage` (`lang`) on mount. Updates `<html lang>` attribute reactively.
 - `useT()` — returns `{ t, locale, setLocale }`.
   - `t` is typed as `Messages` (the Catalan shape), so all keys are autocompleted.
   - `locale` is `'ca' | 'es'`.
@@ -50,7 +55,7 @@ The `layout.tsx` metadata is also written in Catalan.
 - **No URL-based routing** (`/ca/`, `/es/`). Language is purely client-side.  
   Consequence: SEO metadata is always in Catalan; page titles don't change per language.
 - **No SSR language detection** (no cookie on first render). The initial render is always Catalan; the correct language loads after hydration if the user had a stored preference.
-- These are intentional trade-offs for simplicity. If URL-based i18n is needed in the future, migrate to `next-intl` with middleware.
+- These are intentional trade-offs for simplicity. If URL-based i18n is needed in the future, migrate to `next-intl` (Next 16 calls middleware `proxy`).
 
 ## How to use in a new component
 
@@ -65,3 +70,5 @@ export function MyComponent() {
 ```
 
 Server components cannot use `useT()`. Pass translated strings as props from a client wrapper, or keep server-only text hardcoded in Catalan.
+
+The admin app is Spanish-only and does not use this system.
