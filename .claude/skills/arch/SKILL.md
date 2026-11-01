@@ -5,7 +5,7 @@ description: FestPage architecture overview — what the monorepo contains, the 
 
 # FestPage — Architecture overview
 
-FestPage is the website of **Fest Descans**, a bed/mattress shop in Valls (Tarragona): a public catalogue with contact form, plus an admin panel. pnpm workspace + Nx monorepo.
+FestPage is the website of **Fest Descans**, a bed/mattress shop in Valls (Tarragona): a public catalogue with contact form, plus an admin panel. pnpm workspace monorepo (no Nx/Turbo: root scripts are plain `pnpm --filter`/`-r`, e.g. `pnpm dev`, `pnpm test`, `pnpm db:migrate`).
 
 ```
 apps/
@@ -16,7 +16,7 @@ packages/
   db/       Prisma schema, migrations, prisma.config.ts, seed
   types/    Shared TypeScript types (no runtime code)
   ui/       Shared React components (Button, Badge, Card, ProductCard, Spinner)
-  config/   Shared Tailwind/ESLint presets
+  config/   Shared Tailwind preset (`@festpage/config/tailwind`)
 helm/<app>/ Helm chart per app (deployed by ArgoCD from the homelab repo)
 scripts/    check-versions.mjs
 ```

@@ -41,8 +41,6 @@ services:
         NEXT_PUBLIC_API_URL: http://localhost:3001
         # Cloudflare's always-pass test site key
         NEXT_PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
-    environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3001
     ports:
       - '3000:3000'
     depends_on:
@@ -54,8 +52,6 @@ services:
       dockerfile: apps/admin/Dockerfile
       args:
         NEXT_PUBLIC_API_URL: http://localhost:3001
-    environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3001
     ports:
       - '3002:3002'
     depends_on:

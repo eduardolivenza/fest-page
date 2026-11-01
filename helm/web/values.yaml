@@ -12,16 +12,7 @@ resources:
   limits:
     memory: 512Mi
     cpu: 500m
-# Public URL of the API — baked in at build time via NEXT_PUBLIC_API_URL,
-# but also set as a runtime env var for server-side fetches.
-apiUrl: http://fest-descans-api:3001
-ingress:
-  className: traefik
-  host: festdescans.com
-  tls:
-    enabled: false
-    secretName: fest-descans-web-tls
-    clusterIssuer: letsencrypt-prod
+# The API URL is baked into the image at build time (NEXT_PUBLIC_API_URL build arg in CI).
 global:
   # Pull secret for the private ghcr.io images. The SealedSecret lives in the api chart
   # (helm/api/templates/sealed-ghcr-credentials.yaml); all apps share the namespace.

@@ -1,14 +1,15 @@
 node_modules
 dist
 .next
-.turbo
-.nx/cache
 .env
 .env.local
 .env.*.local
 *.log
 coverage
-.nx/workspace-data
 .idea
 apps/api/src/generated
-.idea/**
+*.tsbuildinfo
+# leftover cache from the removed Nx
+.nx
+# written by `next dev` (Next 16)
+apps/*/AGENTS.md
