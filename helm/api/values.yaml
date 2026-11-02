@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/eduardolivenza/festpage/api
-  tag: api-v0.0.17
+  tag: api-v0.1.0
   pullPolicy: IfNotPresent
 replicas: 1
 service:
@@ -67,12 +67,12 @@ postgresql:
     periodSeconds: 10
     timeoutSeconds: 15
     failureThreshold: 6
-  terminationGracePeriodSeconds: 120  # room for a clean shutdown → no crash recovery next start
+  terminationGracePeriodSeconds: 120 # room for a clean shutdown → no crash recovery next start
   # Passed as "postgres -c key=value". See homelab skill fest-descans-postgres for why.
   config:
-    recovery_init_sync_method: syncfs  # crash recovery syncs the FS once instead of every file (HDD)
-    checkpoint_timeout: 60s            # end-of-recovery waited a full checkpoint_timeout; 60s caps it
-    io_method: sync                    # workaround for backends hanging in authentication; keep until the kernel is cleared
+    recovery_init_sync_method: syncfs # crash recovery syncs the FS once instead of every file (HDD)
+    checkpoint_timeout: 60s # end-of-recovery waited a full checkpoint_timeout; 60s caps it
+    io_method: sync # workaround for backends hanging in authentication; keep until the kernel is cleared
 global:
   # Pull secret for the private ghcr.io images. The SealedSecret lives in the api chart
   # (helm/api/templates/sealed-ghcr-credentials.yaml); all apps share the namespace.
