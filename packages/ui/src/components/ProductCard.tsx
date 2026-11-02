@@ -18,7 +18,7 @@ export function ProductCard({ product, onAddToCart, href }: ProductCardProps) {
   const firstImage = product.images[0];
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xs transition-shadow hover:shadow-md">
       <a href={href ?? `/products/${product.id}`} className="block overflow-hidden">
         <div className="relative aspect-[4/3] bg-gray-50">
           {firstImage ? (

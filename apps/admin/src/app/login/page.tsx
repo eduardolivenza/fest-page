@@ -53,14 +53,14 @@ export default function LoginPage() {
             <label className="block text-sm font-medium text-gray-700" htmlFor="email">Email</label>
             <input
               id="email" name="email" type="email" required autoComplete="email"
-              className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-none focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
+              className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-hidden focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700" htmlFor="password">Contraseña</label>
             <input
               id="password" name="password" type="password" required autoComplete="current-password"
-              className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-none focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
+              className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-hidden focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
             />
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}

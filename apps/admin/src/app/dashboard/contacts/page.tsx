@@ -41,7 +41,7 @@ export default function ContactsPage() {
         {result === null ? (
           <p className="text-gray-400">Cargando…</p>
         ) : result.data.map((c) => (
-          <div key={c.id} className={`rounded-2xl border bg-white p-5 shadow-sm transition-colors ${c.read ? 'border-gray-100' : 'border-brand-blue-200'}`}>
+          <div key={c.id} className={`rounded-2xl border bg-white p-5 shadow-xs transition-colors ${c.read ? 'border-gray-100' : 'border-brand-blue-200'}`}>
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2">

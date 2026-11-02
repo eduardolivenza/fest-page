@@ -1,0 +1,61 @@
+/*
+ * FestPage design tokens + v3-compatible defaults, shared by apps/web and apps/admin.
+ * Imported after `@import "tailwindcss"` in each app's globals.css.
+ * Variables in @theme generate utilities: --color-brand-blue-700 → bg-brand-blue-700, text-…, border-…
+ */
+@theme {
+  /* Brand navy (primary: 700) */
+  --color-brand-blue-50: #eef1f8;
+  --color-brand-blue-100: #d5deee;
+  --color-brand-blue-200: #aabddd;
+  --color-brand-blue-300: #7a97c8;
+  --color-brand-blue-400: #4f74b0;
+  --color-brand-blue-500: #2d5499;
+  --color-brand-blue-600: #1f4080;
+  --color-brand-blue-700: #1b3566;
+  --color-brand-blue-800: #142850;
+  --color-brand-blue-900: #0d1b38;
+  --color-brand-blue-950: #070e1e;
+
+  /* Brand lime green (primary: 500) */
+  --color-brand-green-50: #f5fae8;
+  --color-brand-green-100: #e8f4c8;
+  --color-brand-green-200: #d0e895;
+  --color-brand-green-300: #b2d85b;
+  --color-brand-green-400: #9cca44;
+  --color-brand-green-500: #8cc63f;
+  --color-brand-green-600: #72a030;
+  --color-brand-green-700: #567923;
+  --color-brand-green-800: #3a5218;
+  --color-brand-green-900: #243310;
+
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-display: Montserrat, 'Arial Black', Arial, sans-serif;
+}
+
+/*
+ * Tailwind v4 changed these defaults; keep the v3 look (official compatibility snippets
+ * from the v4 upgrade guide). Remove one only after checking every page it affects.
+ */
+@layer base {
+  /* v4: borders/dividers default to currentColor (v3: gray-200) */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+
+  /* v4: placeholders are the text color at 50% (v3: gray-400) */
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-gray-400);
+  }
+
+  /* v4: buttons use cursor: default (v3: pointer) */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}

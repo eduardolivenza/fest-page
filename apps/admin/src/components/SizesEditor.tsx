@@ -68,7 +68,7 @@ export function SizesEditor({ initial = [], name = 'sizes' }: SizesEditorProps) 
                       type="number" min="1" required
                       value={row.width}
                       onChange={(e) => updateRow(i, 'width', parseInt(e.target.value, 10))}
-                      className="w-24 rounded border border-gray-200 px-2 py-1 outline-none focus:border-brand-blue-400"
+                      className="w-24 rounded-sm border border-gray-200 px-2 py-1 outline-hidden focus:border-brand-blue-400"
                     />
                   </td>
                   <td className="px-3 py-2">
@@ -76,7 +76,7 @@ export function SizesEditor({ initial = [], name = 'sizes' }: SizesEditorProps) 
                       type="number" min="1" required
                       value={row.length}
                       onChange={(e) => updateRow(i, 'length', parseInt(e.target.value, 10))}
-                      className="w-24 rounded border border-gray-200 px-2 py-1 outline-none focus:border-brand-blue-400"
+                      className="w-24 rounded-sm border border-gray-200 px-2 py-1 outline-hidden focus:border-brand-blue-400"
                     />
                   </td>
                   <td className="px-3 py-2">
@@ -84,7 +84,7 @@ export function SizesEditor({ initial = [], name = 'sizes' }: SizesEditorProps) 
                       type="number" min="0" step="0.01" required
                       value={row.price}
                       onChange={(e) => updateRow(i, 'price', parseFloat(e.target.value))}
-                      className="w-28 rounded border border-gray-200 px-2 py-1 outline-none focus:border-brand-blue-400"
+                      className="w-28 rounded-sm border border-gray-200 px-2 py-1 outline-hidden focus:border-brand-blue-400"
                     />
                   </td>
                   <td className="px-3 py-2">

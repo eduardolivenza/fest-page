@@ -53,7 +53,7 @@ pnpm check:versions --latest   # + recommended latest releases from nodejs.org a
 - **Node 25+**: built-in global `localStorage` (undefined without `--localstorage-file`) shadows jsdom's; `apps/{web,admin}/test/setup.ts` fixes tests. Don't remove it.
 - **argon2 on Alpine**: its musl prebuild doesn't load on `node:*-alpine`, so the api Dockerfile `deps` stage installs `python3 make g++` to build it. Keep that.
 - **Prisma 7**: client is generated into `apps/api/src/generated/prisma` (gitignored); URL in `packages/db/prisma.config.ts`; driver adapter required. See `arch-api`.
-- **Next 16**: Turbopack by default: CSS `@import` must come before `@tailwind`. `next lint` no longer exists.
+- **Next 16**: Turbopack by default: CSS `@import url(...)` must come first in `globals.css`. `next lint` no longer exists.
 - **TypeScript 7** (Go-native `tsc`, statically linked so it runs on Alpine):
   - `baseUrl` is removed: `paths` are relative to the tsconfig that declares them (`./packages/...` in the root config).
   - `types` defaults to `[]`: code that uses Node globals declares `"types": ["node"]` (api). `strict`, `esModuleInterop` are always on.
@@ -64,4 +64,4 @@ pnpm check:versions --latest   # + recommended latest releases from nodejs.org a
   - `clearMocks` is on by default (mock call history is cleared before every test); `mockReset` restores a `vi.fn(impl)` to `impl`.
   - `vi.mock`/`vi.hoisted` must be at module top level (inside a function or test it now throws); `expect(...).resolves/.rejects` must be awaited or the test fails.
   - Requires Node >= 22.12.
-- Majors with known breaking changes, not yet adopted: Tailwind 4, Zod 4. Treat each as its own planned upgrade.
+- **Tailwind 4**: CSS-first config (see `arch-frontend`); `tailwindcss` and `@tailwindcss/postcss` must share one version. The `@tailwindcss/upgrade` tool does not work in this pnpm monorepo; the class renames were done by hand following the official upgrade guide.
