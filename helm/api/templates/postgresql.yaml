@@ -94,6 +94,15 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: [ALL]
+            # Host kernel 7.0.0-42 (Ubuntu, kernel.apparmor_restrict_unprivileged_unconfined=1)
+            # runs containers under the stacked label "cri-containerd.apparmor.d//&unconfined",
+            # and the runtime-default profile then denies signals between processes of the
+            # same container (dmesg: apparmor="DENIED" operation="signal" signal=urg/usr1).
+            # PostgreSQL wakes its processes with SIGURG/SIGUSR1, so it stalls (2026-10-29/30
+            # outage, restarts on 2026-11-02). Unconfined only for this container until the
+            # host is fixed (homelab); non-root, no capabilities and seccomp still apply.
+            appArmorProfile:
+              type: Unconfined
           env:
             - name: POSTGRES_USER
               value: postgres
