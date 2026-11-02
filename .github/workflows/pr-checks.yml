@@ -53,6 +53,14 @@ jobs:
       - name: Build
         run: pnpm --filter "./apps/*" run build
 
+      # Charts are only applied by ArgoCD after merge: at least make sure they render.
+      - name: Helm charts
+        run: |
+          for c in helm/*/; do
+            helm lint "$c"
+            helm template ci "$c" > /dev/null
+          done
+
   images:
     name: Image (${{ matrix.app }})
     runs-on: ubuntu-latest
@@ -82,9 +90,25 @@ jobs:
         run: |
           retry() { for i in $(seq 15); do "$@" && return 0; sleep 2; done; return 1; }
 
-          docker run -d --name pg -p 5432:5432 \
-            -e POSTGRES_USER=festpage -e POSTGRES_PASSWORD=festpage -e POSTGRES_DB=festpage \
-            postgres:18-alpine
+          # Same PostgreSQL image, init script and settings as production (helm/api):
+          # superuser "postgres", app user created by the init script, owner but not superuser.
+          pg_image=$(yq '.postgresql.image.repository + ":" + .postgresql.image.tag + "@" + .postgresql.image.digest' helm/api/values.yaml)
+          pg_args=$(yq '.postgresql.config | to_entries | map("-c " + .key + "=" + (.value | tostring)) | join(" ")' helm/api/values.yaml)
+          mkdir -p "$RUNNER_TEMP/initdb"
+          helm template ci helm/api --show-only templates/postgresql.yaml \
+            | yq 'select(.kind == "ConfigMap") | .data["10-app-user.sh"]' > "$RUNNER_TEMP/initdb/10-app-user.sh"
+          chmod -R a+rX "$RUNNER_TEMP/initdb"
+          docker run -d --name pg -p 5432:5432 --user 999:999 \
+            -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=ci-superuser -e POSTGRES_DB=festpage \
+            -e APP_DB_USER=festpage -e APP_DB_PASSWORD=festpage \
+            -v "$RUNNER_TEMP/initdb:/docker-entrypoint-initdb.d:ro" \
+            "$pg_image" postgres $pg_args
+
+          # TCP only answers once init (and the init script) is done; then the app user
+          # must exist and must not be a superuser.
+          retry docker exec pg pg_isready -h 127.0.0.1 -U festpage -d festpage
+          test "$(docker exec pg psql -U postgres -d festpage -tAc \
+            "select rolsuper from pg_roles where rolname = 'festpage'")" = f
 
           docker run --rm -w /repo/apps/api festpage-api:pr node --input-type=module \
             -e "const a = await import('argon2'); await a.verify(await a.hash('x'), 'x'); console.log('argon2 ok')"
@@ -99,4 +123,6 @@ jobs:
 
       - name: Api container logs
         if: failure() && matrix.app == 'api'
-        run: docker logs api || true
+        run: |
+          docker logs pg || true
+          docker logs api || true

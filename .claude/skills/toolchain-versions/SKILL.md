@@ -20,7 +20,7 @@ pnpm check:versions --latest   # + recommended latest releases from nodejs.org a
 | Node (major) | `package.json` → `engines.node` | `FROM node:<x.y.z>-alpine` in the 3 Dockerfiles (same exact tag in all); `node-version:` in every `.github/workflows/*.yml`; `@types/node` major (root, api) |
 | Prisma | one version for `prisma`, `@prisma/client`, `@prisma/adapter-pg` | all `package.json` files that declare them (Renovate groups them) |
 | Next / React | `next` same in web + admin; `react`/`react-dom` and `@types/react`/`@types/react-dom` same everywhere | |
-| Postgres | production: Bitnami subchart in `helm/api` (homelab skill `fest-descans-postgres`) | CI smoke test `postgres:18` in `pr-checks.yml`; `docker-compose.yml` is still 16 (warn: changing it breaks existing local volumes) |
+| Postgres | `helm/api/values.yaml` → `postgresql.image` (official `postgres`, exact tag + digest; template `helm/api/templates/postgresql.yaml`) | `docker-compose.yml` same major (the CI smoke test reads the image from the values). A **major** bump is a data migration (dump/restore), never just a tag change: see homelab skill `fest-descans-postgres` |
 
 `pnpm/action-setup` must **not** set `version:`; it reads `packageManager`. pnpm itself also switches to the pinned version, so running a different pnpm in this repo silently uses the pinned one.
 
