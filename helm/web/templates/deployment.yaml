@@ -24,6 +24,8 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.replicas }}
+  # Old ReplicaSets kept for `kubectl rollout undo` (default 10)
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ .Chart.Name }}

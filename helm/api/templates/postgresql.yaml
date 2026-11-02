@@ -57,6 +57,7 @@ metadata:
     app.kubernetes.io/component: db
 spec:
   replicas: 1
+  revisionHistoryLimit: 3
   serviceName: {{ .Release.Name }}-postgresql
   selector:
     matchLabels:
@@ -157,7 +158,10 @@ spec:
             medium: Memory
             sizeLimit: 64Mi
   volumeClaimTemplates:
-    - metadata:
+    # apiVersion/kind are stored by the API server; declared so ArgoCD doesn't report a diff.
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
         name: data
       spec:
         accessModes: [ReadWriteOnce]
