@@ -18,58 +18,61 @@ cors:
   adminUrl: https://admin.festdescans.com
 # Secrets are SealedSecrets in templates/ (encrypted for the homelab cluster's
 # sealed-secrets controller, safe to commit):
-#   sealed-secret.yaml            -> Secret "fest-descans-api": JWT_SECRET, password, postgres-password
-#                                   (also the postgresql subchart's existingSecret)
+#   sealed-secret.yaml            -> Secret "fest-descans-api": JWT_SECRET, password (app user),
+#                                   postgres-password (superuser "postgres")
 #   sealed-ghcr-credentials.yaml  -> Secret "ghcr-credentials" (ghcr.io pull secret for web/admin/api)
 #   sealed-turnstile.yaml         -> Secret "fest-descans-api-turnstile": TURNSTILE_SECRET_KEY
 #                                   (optional: without it the contact form captcha is not enforced)
 # Rotate: kubectl create secret ... --dry-run=client -o yaml | kubeseal -o yaml > templates/<file>.yaml
 # DB passwords are only read at first init: also ALTER USER inside PostgreSQL when rotating.
 # Full guide: homelab repo, .claude/skills/homelab-secrets/SKILL.md
+
+# PostgreSQL: official image, templates/postgresql.yaml (StatefulSet "<release>-db",
+# Service "<release>-postgresql" so DATABASE_URL is unchanged). Replaced the Bitnami
+# subchart in 2026-11; its old PVC data-<release>-postgresql-0 is kept, not used.
 postgresql:
-  enabled: true
   image:
-    tag: latest
-    digest: sha256:f67b10b185d344b15e9999b57bdbedb13b9a4c33aa3a939467ee519cec49d40e
+    repository: docker.io/library/postgres
+    # Same major as the data on the PVC: a new major needs dump/restore (or pg_upgrade), never just a bump.
+    tag: "18.6"
+    digest: sha256:3a4264520e121176619f54ff867d12774bc81e95e7b84db58d63bccdb6144b81
   auth:
     database: fest-descans
     username: fest-descans
+    # Secret with keys "password" (app user) and "postgres-password" (superuser).
     # Must match .Release.Name — ArgoCD sets this to "fest-descans-api" via the ApplicationSet.
     existingSecret: "fest-descans-api"
-  primary:
-    persistence:
-      size: 5Gi
-    resources:
-      requests:
-        memory: 256Mi
-        cpu: 100m
-      limits:
-        memory: 512Mi
-        cpu: 500m
-    startupProbe:
-      enabled: true
-      initialDelaySeconds: 15
-      periodSeconds: 10
-      timeoutSeconds: 15
-      failureThreshold: 180
-    livenessProbe:
-      enabled: true
-      initialDelaySeconds: 0
-      periodSeconds: 30
-      timeoutSeconds: 15
-      failureThreshold: 10
-    readinessProbe:
-      enabled: true
-      initialDelaySeconds: 5
-      periodSeconds: 10
-      timeoutSeconds: 15
-      failureThreshold: 6
-      successThreshold: 1
-    terminationGracePeriodSeconds: 120
-    extendedConfiguration: |
-      recovery_init_sync_method = syncfs
-      checkpoint_timeout = 60s
-      io_method = sync
+  persistence:
+    size: 5Gi
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+  # Generous on purpose: crash recovery on the HDD can take minutes (2026-10-29/30 outage).
+  startupProbe:
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    timeoutSeconds: 15
+    failureThreshold: 180
+  livenessProbe:
+    initialDelaySeconds: 0
+    periodSeconds: 30
+    timeoutSeconds: 15
+    failureThreshold: 10
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 15
+    failureThreshold: 6
+  terminationGracePeriodSeconds: 120  # room for a clean shutdown → no crash recovery next start
+  # Passed as "postgres -c key=value". See homelab skill fest-descans-postgres for why.
+  config:
+    recovery_init_sync_method: syncfs  # crash recovery syncs the FS once instead of every file (HDD)
+    checkpoint_timeout: 60s            # end-of-recovery waited a full checkpoint_timeout; 60s caps it
+    io_method: sync                    # workaround for backends hanging in authentication; keep until the kernel is cleared
 global:
   # Pull secret for the private ghcr.io images. The SealedSecret lives in the api chart
   # (helm/api/templates/sealed-ghcr-credentials.yaml); all apps share the namespace.

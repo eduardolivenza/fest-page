@@ -19,7 +19,8 @@ Claude cannot push to main or touch the cluster: work on a branch, push it, give
 ## PR checks (`.github/workflows/pr-checks.yml`): the merge gate
 
 - **Checks**: version pins (`scripts/check-versions.mjs`), `pnpm install --frozen-lockfile`, typecheck, all tests, build all apps.
-- **Image (api|web|admin)**: Docker build without push. The api job also starts Postgres 18, runs `prisma migrate deploy` exactly like the initContainer, starts the server and calls `/health` and `/api/products`, and loads argon2.
+- **Checks** also runs `helm lint` + `helm template` on every chart in `helm/`.
+- **Image (api|web|admin)**: Docker build without push. The api job also starts the production Postgres image with the chart's init script and settings (app user not a superuser), runs `prisma migrate deploy` exactly like the initContainer, starts the server and calls `/health` and `/api/products`, and loads argon2.
 - They run on every PR without path filters, so the required checks always report. Intended ruleset on `main` (configured in GitHub settings, not in the repo): PR required, these checks required, branch up to date, GitHub Actions in the bypass list (for the tag-bump commits).
 - Never merge with red or pending checks; never "fix" a check by weakening it without saying so.
 

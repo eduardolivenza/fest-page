@@ -62,9 +62,11 @@ for (const group of lockstep) {
   else if (all.length) rows.push(['ok ', group.join(' / '), `${all.length} declarations`, all[0][1]]);
 }
 
-const ciPg = read('.github/workflows/pr-checks.yml').match(/postgres:(\d+)/)?.[1];
+// Production PostgreSQL (helm/api, official image) is the source of truth; local dev must use the same major.
+const prodPg = read('helm/api/values.yaml').match(/^\s*tag:\s*"?(\d+)\.\d+"?\s*$/m)?.[1];
 const devPg = read('docker-compose.yml').match(/image:\s*postgres:(\d+)/)?.[1];
-rows.push([ciPg === devPg ? 'ok ' : 'warn', 'postgres major', 'pr-checks smoke test vs docker-compose', `${ciPg} vs ${devPg} (production: Bitnami subchart, see homelab)`]);
+rows.push(['src ', 'postgres major', 'helm/api/values.yaml postgresql.image.tag', prodPg]);
+check('postgres major', prodPg, devPg, 'docker-compose.yml');
 
 const w = [4, 28, 52];
 for (const r of rows) console.log(r.map((c, i) => String(c ?? '').padEnd(w[i] ?? 0)).join(' '));
