@@ -33,7 +33,7 @@ export default function OrdersPage() {
   return (
     <div>
       <h1 className="font-display text-3xl font-bold text-brand-blue-900">Pedidos</h1>
-      <div className="mt-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+      <div className="mt-6 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xs">
         <table className="w-full text-sm">
           <thead className="border-b border-gray-100 bg-gray-50 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
             <tr>

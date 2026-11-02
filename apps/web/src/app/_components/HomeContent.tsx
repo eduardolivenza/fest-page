@@ -34,7 +34,7 @@ export function HomeContent() {
           className="object-cover opacity-30"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-blue-900/90 via-brand-blue-800/70 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-r from-brand-blue-900/90 via-brand-blue-800/70 to-transparent" />
 
         <div className="relative mx-auto flex min-h-[90vh] max-w-6xl items-center px-4 py-24">
           <div className="max-w-2xl">
@@ -57,7 +57,7 @@ export function HomeContent() {
               </Link>
               <Link
                 href="/contact"
-                className="rounded-lg border border-white/30 px-8 py-4 font-display font-bold text-white backdrop-blur-sm transition-all hover:border-white/60 hover:bg-white/10"
+                className="rounded-lg border border-white/30 px-8 py-4 font-display font-bold text-white backdrop-blur-xs transition-all hover:border-white/60 hover:bg-white/10"
               >
                 {h.hero.visitStore}
               </Link>
@@ -65,7 +65,7 @@ export function HomeContent() {
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-linear-to-t from-white to-transparent" />
       </section>
 
       {/* ── CATEGORIES ───────────────────────────────────────── */}
@@ -91,7 +91,7 @@ export function HomeContent() {
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-blue-900/90 via-brand-blue-800/30 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-brand-blue-900/90 via-brand-blue-800/30 to-transparent" />
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-6">
                 <div className="mb-1 h-0.5 w-8 rounded-full bg-brand-green-500 transition-all duration-300 group-hover:w-16" />

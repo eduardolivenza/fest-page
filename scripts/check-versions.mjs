@@ -54,7 +54,7 @@ for (const p of pkgs) {
 for (const p of specs['@types/node'] ?? []) check('@types/node major', nodeMajor, major(p[1]), p[0]);
 
 // Packages that must move together: same spec everywhere, and grouped ones on the same version.
-const lockstep = [['prisma', '@prisma/client', '@prisma/adapter-pg'], ['next'], ['react', 'react-dom'], ['@types/react', '@types/react-dom'], ['typescript'], ['vitest']];
+const lockstep = [['prisma', '@prisma/client', '@prisma/adapter-pg'], ['next'], ['react', 'react-dom'], ['@types/react', '@types/react-dom'], ['typescript'], ['vitest'], ['tailwindcss', '@tailwindcss/postcss']];
 for (const group of lockstep) {
   const all = group.flatMap((n) => (specs[n] ?? []).map(([p, s]) => [`${n} in ${p}`, s]));
   const distinct = new Set(all.map(([, s]) => (group.length > 1 || group[0] !== 'vitest' ? s : major(s))));

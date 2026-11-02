@@ -52,12 +52,12 @@ export default function NewProductPage() {
     <div className="mx-auto max-w-xl">
       <h1 className="font-display text-3xl font-bold text-brand-blue-900">Nuevo producto</h1>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-5 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+      <form onSubmit={handleSubmit} className="mt-8 space-y-5 rounded-2xl border border-gray-100 bg-white p-6 shadow-xs">
         <div>
           <label className="block text-sm font-medium text-gray-700" htmlFor="name">Nombre</label>
           <input
             id="name" name="name" type="text" required onChange={handleNameChange}
-            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-none focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
+            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-hidden focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
           />
         </div>
 
@@ -65,7 +65,7 @@ export default function NewProductPage() {
           <label className="block text-sm font-medium text-gray-700" htmlFor="slug">Slug (URL)</label>
           <input
             id="slug" name="slug" type="text" required pattern="[a-z0-9-]+"
-            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-none focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
+            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-hidden focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
           />
         </div>
 
@@ -75,7 +75,7 @@ export default function NewProductPage() {
             id="category" name="category" required
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-none focus:border-brand-blue-500"
+            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-hidden focus:border-brand-blue-500"
           >
             <option value="BED">Cama</option>
             <option value="MATTRESS">Colchón</option>
@@ -88,7 +88,7 @@ export default function NewProductPage() {
           <label className="block text-sm font-medium text-gray-700" htmlFor="price">Precio base (€)</label>
           <input
             id="price" name="price" type="number" required step="0.01" min="0"
-            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-none focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
+            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-hidden focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
           />
         </div>
 
@@ -96,12 +96,12 @@ export default function NewProductPage() {
           <label className="block text-sm font-medium text-gray-700" htmlFor="description">Descripción</label>
           <textarea
             id="description" name="description" rows={4}
-            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-none focus:border-brand-blue-500"
+            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 outline-hidden focus:border-brand-blue-500"
           />
         </div>
 
         <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-          <input type="checkbox" name="featured" className="rounded" />
+          <input type="checkbox" name="featured" className="rounded-sm" />
           Producto destacado
         </label>
 

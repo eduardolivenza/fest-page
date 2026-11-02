@@ -42,7 +42,6 @@
   ],
   "exclude": [
     "node_modules",
-    "tailwind.config.ts",
     "postcss.config.js"
   ]
 }

@@ -3,6 +3,6 @@
   "version": "0.0.1",
   "private": true,
   "exports": {
-    "./tailwind": "./src/tailwind-preset.js"
+    "./theme.css": "./src/theme.css"
   }
 }

@@ -9,7 +9,7 @@ export function Navbar() {
   const { t } = useT();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur-sm">
+    <header className="sticky top-0 z-40 border-b border-gray-100 bg-white/95 shadow-xs backdrop-blur-xs">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         <Link href="/" className="flex items-center">
           <Image src="/Logo.PNG" alt="Fest Descans" width={180} height={60} priority />

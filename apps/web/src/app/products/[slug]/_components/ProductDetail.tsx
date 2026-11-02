@@ -35,8 +35,8 @@ export function ProductDetail() {
           <div className="space-y-4">
             <div className="animate-pulse h-6 w-24 rounded-full bg-gray-100" />
             <div className="animate-pulse h-10 w-3/4 rounded-lg bg-gray-100" />
-            <div className="animate-pulse h-4 w-full rounded bg-gray-100" />
-            <div className="animate-pulse h-4 w-5/6 rounded bg-gray-100" />
+            <div className="animate-pulse h-4 w-full rounded-sm bg-gray-100" />
+            <div className="animate-pulse h-4 w-5/6 rounded-sm bg-gray-100" />
           </div>
         </div>
       </div>
@@ -63,7 +63,7 @@ export function ProductDetail() {
           {images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto">
               {images.map((img) => (
-                <div key={img.id} className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                <div key={img.id} className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                   <img src={img.url} alt={img.alt ?? ''} className="h-full w-full object-cover" />
                 </div>
               ))}

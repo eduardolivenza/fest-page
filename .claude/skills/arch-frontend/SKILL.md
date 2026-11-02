@@ -5,7 +5,7 @@ description: FestPage frontends (apps/web public site and apps/admin back office
 
 # FestPage — Frontends (`apps/web`, `apps/admin`)
 
-Next.js App Router (Turbopack), React 19, Tailwind CSS 3, `output: 'standalone'` (Docker runs `apps/<app>/server.js`).
+Next.js App Router (Turbopack), React 19, Tailwind CSS 4, `output: 'standalone'` (Docker runs `apps/<app>/server.js`).
 
 ## Data fetching: client-side
 
@@ -40,7 +40,9 @@ Everything under `/dashboard` is client-side. `dashboard/layout.tsx` checks `loc
 
 - `@festpage/ui` (`packages/ui`): `Button` (variants, `loading`), `Badge`, `Card`, `ProductCard`, `Spinner`. Prefer these over new one-off components; add to the package when used by both apps.
 - `@festpage/types`: shared API shapes (`Product`, `PaginatedResponse`, `ContactRequest`…), must match what the API returns.
-- Tailwind brand tokens in `tailwind.config.ts`: `brand-blue-*` (navy, #1B3566) and `brand-green-*` (lime, #8CC63F); fonts via Google Fonts `@import` at the **top** of `globals.css` (Turbopack rejects it after `@tailwind`).
+- Tailwind 4, configured in CSS (no `tailwind.config.*`): each app's `src/app/globals.css` does `@import 'tailwindcss'`, `@import '@festpage/config/theme.css'` and `@source '../../../../packages/ui/src'` (otherwise classes used only in `@festpage/ui` are not generated). PostCSS plugin `@tailwindcss/postcss`, no autoprefixer.
+- Brand tokens in `packages/config/src/theme.css` (`@theme`): `brand-blue-*` (navy, #1B3566) and `brand-green-*` (lime, #8CC63F), `font-sans` (Inter), `font-display` (Montserrat). The same file keeps the v3 defaults v4 changed (border color gray-200, placeholder gray-400, pointer cursor on buttons). Fonts via Google Fonts `@import url(...)` at the **top** of `globals.css`.
+- v4 class names: `shadow-xs` (old `shadow-sm`), `rounded-sm` (old `rounded`), `outline-hidden` (old `outline-none`), `bg-linear-to-*`, `shrink-*`. Bare `ring` is 1px: always write `ring-2` + a ring color. Supported browsers: Safari 16.4+, Chrome 111+, Firefox 128+.
 - Logos in `apps/web/public/`: `Logo.PNG` for the navbar (light background), `LOGO_fest.png` for the footer (dark background; don't apply `brightness-0 invert`).
 - Images: `next/image` with `remotePatterns` allowing any https host (product images are external URLs).
 

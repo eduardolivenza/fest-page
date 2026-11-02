@@ -122,14 +122,14 @@ export default function ContactPage() {
                     <label className="block text-sm font-medium text-gray-700" htmlFor="name">{c.form.name}</label>
                     <input
                       id="name" name="name" type="text" required
-                      className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
+                      className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 outline-hidden focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700" htmlFor="phone">{c.form.phone}</label>
                     <input
                       id="phone" name="phone" type="tel"
-                      className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
+                      className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 outline-hidden focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
                     />
                   </div>
                 </div>
@@ -137,14 +137,14 @@ export default function ContactPage() {
                   <label className="block text-sm font-medium text-gray-700" htmlFor="email">{c.form.email}</label>
                   <input
                     id="email" name="email" type="email" required
-                    className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
+                    className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 outline-hidden focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700" htmlFor="message">{c.form.message}</label>
                   <textarea
                     id="message" name="message" required rows={5}
-                    className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
+                    className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 outline-hidden focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-200"
                   />
                 </div>
                 {TURNSTILE_SITE_KEY && <Turnstile ref={turnstileRef} onToken={setTurnstileToken} />}
@@ -166,7 +166,7 @@ export default function ContactPage() {
 
         {/* Right — map */}
         <div className="flex flex-col gap-6">
-          <div className="overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
+          <div className="overflow-hidden rounded-2xl border border-gray-100 shadow-xs">
             <iframe
               src={STORE.mapsEmbed}
               width="100%"

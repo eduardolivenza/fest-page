@@ -16,7 +16,7 @@ packages/
   db/       Prisma schema, migrations, prisma.config.ts, seed
   types/    Shared TypeScript types (no runtime code)
   ui/       Shared React components (Button, Badge, Card, ProductCard, Spinner)
-  config/   Shared Tailwind preset (`@festpage/config/tailwind`)
+  config/   Shared Tailwind 4 theme (`@festpage/config/theme.css`)
 helm/<app>/ Helm chart per app (deployed by ArgoCD from the homelab repo)
 scripts/    check-versions.mjs
 ```
@@ -27,7 +27,7 @@ Versions: never assume them, see skill `toolchain-versions` (`pnpm check:version
 
 | Layer | Choice |
 |---|---|
-| Frontend | Next.js (App Router, Turbopack), React 19, Tailwind CSS 3 |
+| Frontend | Next.js (App Router, Turbopack), React 19, Tailwind CSS 4 |
 | API | Fastify 5, Zod validation, JWT (`@fastify/jwt`), Argon2 |
 | Data | PostgreSQL, Prisma 7 with `@prisma/adapter-pg` |
 | Anti-spam | Cloudflare Turnstile on the contact form |
