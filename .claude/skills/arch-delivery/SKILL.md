@@ -47,7 +47,7 @@ Tunnel routes in the homelab repo (`components/cloudflared/values.yaml`): `festd
 
 ## Renovate
 
-`renovate.json`: npm updates wait 3 days (pnpm 12 rejects packages < 1 day old), Prisma packages grouped, **majors need approval on the Dependency Dashboard**. Merge Renovate PRs one at a time; with "branch up to date" required, Renovate rebases the next one.
+`renovate.json`: npm updates wait 3 days (pnpm 12 rejects packages < 1 day old); security PRs (`vulnerabilityAlerts`) wait 1 day, because Renovate's default skips the wait for them and their CI would fail the install. Prisma packages grouped, **majors need approval on the Dependency Dashboard**. Merge Renovate PRs one at a time; with "branch up to date" required, Renovate rebases the next one.
 
 ## After a deploy
 

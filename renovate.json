@@ -3,6 +3,9 @@
   "extends": [
     "config:recommended"
   ],
+  "vulnerabilityAlerts": {
+    "minimumReleaseAge": "1 day"
+  },
   "packageRules": [
     {
       "description": "pnpm 12 rejects packages younger than 1 day (minimumReleaseAge); wait longer before proposing updates",
