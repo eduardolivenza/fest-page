@@ -40,37 +40,6 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      initContainers:
-        - name: migrate
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          # Run from packages/db so Prisma finds prisma.config.ts (Prisma 7 reads the URL from it).
-          workingDir: /repo/packages/db
-          # Retries until PostgreSQL is ready, then runs migrations.
-          # This replaces the pre-install Helm hook which ran before PostgreSQL existed.
-          command:
-            - sh
-            - -c
-            - |
-              until node_modules/.bin/prisma migrate deploy; do
-                echo "Migration failed — PostgreSQL not ready yet, retrying in 5s..."
-                sleep 5
-              done
-          env:
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: password
-            - name: DATABASE_URL
-              value: "postgresql://{{ .Values.postgresql.auth.username }}:$(DB_PASSWORD)@{{ .Release.Name }}-postgresql:5432/{{ .Values.postgresql.auth.database }}"
-          resources:
-            requests:
-              memory: 128Mi
-              cpu: 100m
-            limits:
-              memory: 256Mi
-              cpu: 200m
       containers:
         - name: api
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -78,15 +47,15 @@ spec:
           ports:
             - containerPort: {{ .Values.service.port }}
           env:
-            - name: NODE_ENV
-              value: production
-            - name: DB_PASSWORD
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/{{ .Values.postgresql.auth.database }}"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: {{ .Values.postgresql.auth.username | quote }}
+            - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Release.Name }}
                   key: password
-            - name: DATABASE_URL
-              value: "postgresql://{{ .Values.postgresql.auth.username }}:$(DB_PASSWORD)@{{ .Release.Name }}-postgresql:5432/{{ .Values.postgresql.auth.database }}"
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
@@ -102,17 +71,25 @@ spec:
               value: {{ .Values.cors.webUrl | quote }}
             - name: ADMIN_URL
               value: {{ .Values.cors.adminUrl | quote }}
+          # The api applies the Flyway migrations on startup, before it reports ready; if PostgreSQL is not up
+          # yet it exits and Kubernetes restarts it.
+          # Actuator health groups: liveness never checks the database, readiness goes DOWN during shutdown.
+          # The JVM needs a while to start on this server: liveness/readiness only begin once it answers.
+          startupProbe:
+            httpGet:
+              path: /health/liveness
+              port: {{ .Values.service.port }}
+            periodSeconds: 5
+            failureThreshold: 36 # 3 minutes
           readinessProbe:
             httpGet:
-              path: /health
+              path: /health/readiness
               port: {{ .Values.service.port }}
-            initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /health
+              path: /health/liveness
               port: {{ .Values.service.port }}
-            initialDelaySeconds: 30
             periodSeconds: 30
             failureThreshold: 3
           resources:

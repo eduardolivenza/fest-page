@@ -1,7 +1,10 @@
 **/node_modules
 **/.next
 **/dist
-apps/api/src/generated
 .git
 apps/*/test
 apps/*/vitest.config.*
+# api (Gradle): local build output and caches; test sources are not needed for the jar
+apps/api/.gradle
+apps/api/build
+apps/api/src/test

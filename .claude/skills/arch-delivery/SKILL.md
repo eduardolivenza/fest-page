@@ -18,22 +18,25 @@ Claude cannot push to main or touch the cluster: work on a branch, push it, give
 
 ## PR checks (`.github/workflows/pr-checks.yml`): the merge gate
 
-- **Checks**: version pins (`scripts/check-versions.mjs`), `pnpm install --frozen-lockfile`, typecheck, all tests, build all apps.
+- **Checks**: version pins (`scripts/check-versions.mjs`), `pnpm install --frozen-lockfile`, typecheck, all tests, build web/admin, and the api's `./gradlew build` (JDK 25; includes the embedded-PostgreSQL tests).
 - **Checks** also runs `helm lint` + `helm template` on every chart in `helm/`.
-- **Image (api|web|admin)**: Docker build without push. The api job also starts the production Postgres image with the chart's init script and settings (app user not a superuser), runs `prisma migrate deploy` exactly like the initContainer, starts the server and calls `/health` and `/api/products`, and loads argon2.
+- **Image (api|web|admin)**: Docker build without push. The api job also starts the production Postgres image with the chart's init script and settings (app user not a superuser), starts the server (it applies the migrations on startup) with a 512m memory cap, calls `/health/readiness`, `/health` (includes the DB), `/api/products` and checks an admin route answers 401 without a token.
 - They run on every PR without path filters, so the required checks always report. Intended ruleset on `main` (configured in GitHub settings, not in the repo): PR required, these checks required, branch up to date, GitHub Actions in the bypass list (for the tag-bump commits).
 - Never merge with red or pending checks; never "fix" a check by weakening it without saying so.
 
 ## Docker images
 
-Multi-stage (`base` → `deps` → `builder` → `runner`), `node:<pinned>-alpine`, non-root `appuser`, `--mount=type=cache` pnpm store at `/pnpm/store`. web/admin run the Next standalone `server.js`; api runs `node apps/api/dist/index.js` and its image also carries `packages/db` (Prisma CLI + config + migrations) for the migrate initContainer. Cross-stage `COPY --from=` sources must be **absolute** (`/repo/...`). Test files and `vitest.config.*` are excluded via `.dockerignore`.
+web/admin: multi-stage (`base` → `deps` → `builder` → `runner`), `node:<pinned>-alpine`, non-root `appuser`, `--mount=type=cache` pnpm store at `/pnpm/store`, Next standalone `server.js`.
+api: `eclipse-temurin:<pinned>-jdk-alpine` builder (`./gradlew bootJar`, Gradle cache mount, no tests) → `-jre-alpine` runner with the extracted jar in `/app` (`app.jar` + `lib/`), non-root `appuser`, JVM flags in `CMD` sized for the 512Mi limit (heap 60%, SerialGC). Migrations run inside the app on startup (no initContainer). Probes: startup/liveness `/health/liveness`, readiness `/health/readiness` (Actuator). Measured: ~300Mi RSS, ~9s start on one fast core (slower on the server: the chart has a 3-minute `startupProbe`).
+Cross-stage `COPY --from=` sources must be **absolute**. Test files, `vitest.config.*` and the api's `build/`, `.gradle/`, `src/test` are excluded via `.dockerignore`.
 
 ## Runtime config
 
 | Variable | Where it comes from |
 |---|---|
 | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | **build args** in `ci-web.yml`/`ci-admin.yml` (repo variables override defaults) |
-| `DATABASE_URL`, `JWT_SECRET` | api chart, from Secret `fest-descans-api` |
+| `SPRING_DATASOURCE_URL` / `_USERNAME` / `_PASSWORD` | api chart; password from Secret `fest-descans-api` key `password` |
+| `JWT_SECRET` (≥ 32 bytes or the api won't start) | api chart, from Secret `fest-descans-api` |
 | `TURNSTILE_SECRET_KEY` | optional Secret `fest-descans-api-turnstile` |
 | `WEB_URL`, `ADMIN_URL` (CORS) | `helm/api/values.yaml` `cors.*` |
 
@@ -47,12 +50,12 @@ Tunnel routes in the homelab repo (`components/cloudflared/values.yaml`): `festd
 
 ## Renovate
 
-`renovate.json`: npm updates wait 3 days (pnpm 12 rejects packages < 1 day old); security PRs (`vulnerabilityAlerts`) wait 1 day, because Renovate's default skips the wait for them and their CI would fail the install. Prisma packages grouped, **majors need approval on the Dependency Dashboard**. Merge Renovate PRs one at a time; with "branch up to date" required, Renovate rebases the next one.
+`renovate.json`: npm, Maven and Gradle-wrapper updates wait 3 days (pnpm 12 rejects packages < 1 day old); security PRs (`vulnerabilityAlerts`) wait 1 day, because Renovate's default skips the wait for them and their CI would fail the install. Spring Boot's plugin and BOM share one catalog version. `eclipse-temurin` images stay on Java 25 (LTS); the embedded test PostgreSQL never gets a major (it follows production). **Majors need approval on the Dependency Dashboard**. Merge Renovate PRs one at a time; with "branch up to date" required, Renovate rebases the next one.
 
 ## After a deploy
 
 ```bash
 kubectl -n fest-descans get pods -o custom-columns=NAME:.metadata.name,IMAGE:.spec.containers[0].image,STATUS:.status.phase
-kubectl -n fest-descans logs deploy/fest-descans-api -c migrate | tail -3
+kubectl -n fest-descans logs deploy/fest-descans-api | grep -i flyway   # "... No migration necessary." or "Successfully applied N migrations"
 ```
-`/health` does not touch the DB, so also check a real endpoint (`curl -s https://api.festdescans.com/api/products | head -c 200`) and the admin login.
+`/health/liveness` and `/health/readiness` do not touch the DB (`/health` does), so also check a real endpoint (`curl -s https://api.festdescans.com/api/products | head -c 200`) and the admin login.

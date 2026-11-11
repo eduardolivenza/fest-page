@@ -7,10 +7,8 @@
     "build": "pnpm --filter \"./apps/*\" run build",
     "test": "pnpm -r --if-present run test",
     "typecheck": "pnpm -r --if-present run typecheck",
-    "db:generate": "pnpm --filter @festpage/db run generate",
-    "db:migrate": "pnpm --filter @festpage/db run migrate",
-    "db:seed": "pnpm --filter @festpage/db run seed",
-    "db:studio": "pnpm --filter @festpage/db run studio",
+    "api:dev": "cd apps/api && ./gradlew bootRun",
+    "api:build": "cd apps/api && ./gradlew build",
     "check:versions": "node scripts/check-versions.mjs"
   },
   "devDependencies": {

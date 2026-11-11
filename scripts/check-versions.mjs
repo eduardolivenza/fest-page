@@ -2,12 +2,13 @@
 // Checks that every place pinning a toolchain version agrees with the source of truth.
 //   node scripts/check-versions.mjs            consistency check (exit 1 on drift)
 //   node scripts/check-versions.mjs --latest   also show the latest stable releases (needs network)
+// Node/pnpm: web, admin and packages/*. Java/Gradle: apps/api (Spring Boot, gradle/libs.versions.toml).
 import { readFileSync, readdirSync } from 'node:fs';
 
 const read = (p) => readFileSync(p, 'utf8');
 const json = (p) => JSON.parse(read(p));
 const major = (v) => String(v ?? '').replace(/^[^\d]*/, '').split('.')[0];
-const apps = ['api', 'web', 'admin'];
+const nodeApps = ['web', 'admin'];
 const workflows = readdirSync('.github/workflows').filter((f) => f.endsWith('.yml'));
 
 const problems = [];
@@ -26,7 +27,7 @@ const nodeMajor = major(root.engines?.node);
 // Source of truth: package.json "packageManager" (pnpm) and "engines.node" (Node major).
 rows.push(['src', 'pnpm', 'package.json packageManager', pnpm], ['src', 'node major', 'package.json engines.node', nodeMajor]);
 
-for (const app of apps) {
+for (const app of nodeApps) {
   const file = `apps/${app}/Dockerfile`;
   const df = read(file);
   const from = df.match(/^FROM node:(\d+\.\d+\.\d+)-alpine AS base$/m)?.[1];
@@ -34,7 +35,7 @@ for (const app of apps) {
   check('pnpm (npm install -g)', pnpm, df.match(/npm install -g pnpm@(\S+)/)?.[1], file);
   rows.push(['   ', 'node image (exact)', file, from]);
 }
-const images = new Set(apps.map((a) => read(`apps/${a}/Dockerfile`).match(/^FROM node:(\S+) AS base$/m)?.[1]));
+const images = new Set(nodeApps.map((a) => read(`apps/${a}/Dockerfile`).match(/^FROM node:(\S+) AS base$/m)?.[1]));
 if (images.size > 1) problems.push(`Dockerfiles use different node images: ${[...images].join(', ')}`);
 
 for (const wf of workflows) {
@@ -45,7 +46,7 @@ for (const wf of workflows) {
   if (/^\s+version:/m.test(step)) problems.push(`.github/workflows/${wf}: pnpm/action-setup must not set "version" (it reads packageManager)`);
 }
 
-const pkgs = ['package.json', ...apps.map((a) => `apps/${a}/package.json`), ...readdirSync('packages').map((p) => `packages/${p}/package.json`)];
+const pkgs = ['package.json', ...nodeApps.map((a) => `apps/${a}/package.json`), ...readdirSync('packages').map((p) => `packages/${p}/package.json`)];
 const specs = {};
 for (const p of pkgs) {
   const d = json(p);
@@ -54,7 +55,7 @@ for (const p of pkgs) {
 for (const p of specs['@types/node'] ?? []) check('@types/node major', nodeMajor, major(p[1]), p[0]);
 
 // Packages that must move together: same spec everywhere, and grouped ones on the same version.
-const lockstep = [['prisma', '@prisma/client', '@prisma/adapter-pg'], ['next'], ['react', 'react-dom'], ['@types/react', '@types/react-dom'], ['typescript'], ['vitest'], ['tailwindcss', '@tailwindcss/postcss']];
+const lockstep = [['next'], ['react', 'react-dom'], ['@types/react', '@types/react-dom'], ['typescript'], ['vitest'], ['tailwindcss', '@tailwindcss/postcss']];
 for (const group of lockstep) {
   const all = group.flatMap((n) => (specs[n] ?? []).map(([p, s]) => [`${n} in ${p}`, s]));
   const distinct = new Set(all.map(([, s]) => (group.length > 1 || group[0] !== 'vitest' ? s : major(s))));
@@ -62,11 +63,34 @@ for (const group of lockstep) {
   else if (all.length) rows.push(['ok ', group.join(' / '), `${all.length} declarations`, all[0][1]]);
 }
 
-// Production PostgreSQL (helm/api, official image) is the source of truth; local dev must use the same major.
+// Java (api): source of truth is "java" in the Gradle version catalog.
+const catalogFile = 'apps/api/gradle/libs.versions.toml';
+const catalog = read(catalogFile);
+const catalogVersion = (key) => catalog.match(new RegExp(`^${key}\\s*=\\s*"([^"]+)"`, 'm'))?.[1];
+const javaMajor = catalogVersion('java');
+if (!javaMajor) problems.push(`${catalogFile}: missing java = "<major>" in [versions]`);
+rows.push(['src', 'java major', `${catalogFile} java`, javaMajor], ['src', 'spring boot', `${catalogFile} spring-boot`, catalogVersion('spring-boot')]);
+const apiDockerfile = read('apps/api/Dockerfile');
+const temurin = [...apiDockerfile.matchAll(/^FROM eclipse-temurin:(\S+?)-(jdk|jre)-alpine AS \w+$/gm)].map((m) => m[1]);
+if (temurin.length !== 2) problems.push('apps/api/Dockerfile: expected a jdk-alpine builder and a jre-alpine runner (eclipse-temurin)');
+if (new Set(temurin).size > 1) problems.push(`apps/api/Dockerfile: builder and runner use different Java versions: ${temurin.join(', ')}`);
+for (const t of temurin) check('java image', javaMajor, major(t), 'apps/api/Dockerfile');
+rows.push(['   ', 'java image (exact)', 'apps/api/Dockerfile', temurin[0]]);
+for (const wf of workflows) {
+  const text = read(`.github/workflows/${wf}`);
+  for (const m of text.matchAll(/java-version:\s*['"]?([\w.]+)/g)) check('java-version', javaMajor, major(m[1]), `.github/workflows/${wf}`);
+}
+const wrapper = read('apps/api/gradle/wrapper/gradle-wrapper.properties');
+rows.push(['   ', 'gradle (wrapper)', 'apps/api/gradle/wrapper', wrapper.match(/gradle-([\d.]+)-bin\.zip/)?.[1]]);
+if (!/^distributionSha256Sum=[0-9a-f]{64}$/m.test(wrapper)) problems.push('apps/api/gradle/wrapper/gradle-wrapper.properties: distributionSha256Sum must pin the Gradle download');
+
+// Production PostgreSQL (helm/api, official image) is the source of truth; local dev and the api's
+// embedded test database must use the same major.
 const prodPg = read('helm/api/values.yaml').match(/^\s*tag:\s*"?(\d+)\.\d+"?\s*$/m)?.[1];
 const devPg = read('docker-compose.yml').match(/image:\s*postgres:(\d+)/)?.[1];
 rows.push(['src ', 'postgres major', 'helm/api/values.yaml postgresql.image.tag', prodPg]);
 check('postgres major', prodPg, devPg, 'docker-compose.yml');
+check('postgres major (api tests)', prodPg, major(catalogVersion('postgres-binaries')), `${catalogFile} postgres-binaries`);
 
 const w = [4, 28, 52];
 for (const r of rows) console.log(r.map((c, i) => String(c ?? '').padEnd(w[i] ?? 0)).join(' '));
@@ -78,7 +102,7 @@ if (process.argv.includes('--latest')) {
   console.log(`  node         ${lts.version} (LTS "${lts.lts}", ${lts.date}; repo: ${nodeMajor})`);
   // Highest stable version, not the "latest" dist-tag: some projects tag release candidates as latest.
   const cmp = (a, b) => a.split('.').map(Number).reduce((r, n, i) => r || n - Number(b.split('.')[i]), 0);
-  for (const name of ['pnpm', 'next', 'prisma', 'fastify', 'typescript', 'vitest', 'react', 'tailwindcss', 'zod']) {
+  for (const name of ['pnpm', 'next', 'typescript', 'vitest', 'react', 'tailwindcss']) {
     const meta = await (await fetch(`https://registry.npmjs.org/${name}`, { headers: { accept: 'application/vnd.npm.install-v1+json' } })).json();
     const stable = Object.keys(meta.versions).filter((v) => /^\d+\.\d+\.\d+$/.test(v)).sort(cmp).at(-1);
     const tag = meta['dist-tags'].latest;
@@ -88,6 +112,13 @@ if (process.argv.includes('--latest')) {
     const current = specs[name]?.[0]?.[1] ?? (name === 'pnpm' ? pnpm : '-');
     console.log(`  ${name.padEnd(12)} ${pick.padEnd(10)} repo: ${current.padEnd(9)}${major(pick) !== major(current) && current !== '-' ? ' <- new major' : ''}${note}`);
   }
+  const adoptium = await (await fetch('https://api.adoptium.net/v3/info/available_releases')).json();
+  console.log(`  java (LTS)    ${String(adoptium.most_recent_lts).padEnd(10)} repo: ${javaMajor}`);
+  const gradle = await (await fetch('https://services.gradle.org/versions/current')).json();
+  console.log(`  gradle       ${gradle.version.padEnd(10)} repo: ${wrapper.match(/gradle-([\d.]+)-bin\.zip/)?.[1]}`);
+  const bootMeta = await (await fetch('https://repo1.maven.org/maven2/org/springframework/boot/spring-boot/maven-metadata.xml')).text();
+  const boot = [...bootMeta.matchAll(/<version>(\d+\.\d+\.\d+)<\/version>/g)].map((m) => m[1]).sort(cmp).at(-1);
+  console.log(`  spring-boot  ${boot.padEnd(10)} repo: ${catalogVersion('spring-boot')}`);
 }
 
 if (problems.length) {

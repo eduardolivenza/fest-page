@@ -1,6 +1,6 @@
 # FestPage — context for Claude
 
-Website of Fest Descans (Valls): `apps/web` (public site), `apps/admin` (back office), `apps/api` (Fastify + Prisma), deployed to Edu's home K3s server by ArgoCD (infra lives in `../homelab`).
+Website of Fest Descans (Valls): `apps/web` (public site), `apps/admin` (back office), `apps/api` (Java 25 + Spring Boot, hexagonal, Gradle), deployed to Edu's home K3s server by ArgoCD (infra lives in `../homelab`).
 
 The knowledge is in project skills under `.claude/skills/`. Read the relevant one before acting:
 
@@ -15,7 +15,7 @@ The knowledge is in project skills under `.claude/skills/`. Read the relevant on
 ## Ground rules
 
 - **Versions: never from memory.** Run `pnpm check:versions` (add `--latest` to see current releases); it also gates PRs.
-- Before pushing: `pnpm check:versions && pnpm typecheck && pnpm -r --if-present run test && pnpm --filter "./apps/*" run build`.
-- Never hand-edit `pnpm-lock.yaml`; never silently weaken a check (tests, `allowBuilds`, `minimumReleaseAge`, frozen lockfile).
+- Before pushing: `pnpm check:versions && pnpm typecheck && pnpm -r --if-present run test && pnpm --filter "./apps/*" run build && pnpm api:build` (the last one is the api's Gradle build + tests; needs JDK 25).
+- Never hand-edit `pnpm-lock.yaml`; never silently weaken a check (tests, `allowBuilds`, `minimumReleaseAge`, frozen lockfile, the Gradle wrapper checksum).
 - Work on a branch and hand over a PR link; Claude has no access to the cluster: give Edu copy-pasteable commands and expected output.
 - Answer in the language Edu writes in (Spanish or English).

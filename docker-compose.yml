@@ -21,11 +21,14 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile
     environment:
-      DATABASE_URL: postgresql://festpage:festpage_dev@postgres:5432/festpage
-      JWT_SECRET: dev-super-secret-jwt-key
+      # Flyway migrates the schema when the api starts.
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/festpage
+      SPRING_DATASOURCE_USERNAME: festpage
+      SPRING_DATASOURCE_PASSWORD: festpage_dev
+      # At least 32 bytes (HS256).
+      JWT_SECRET: dev-super-secret-jwt-key-0123456789abcdef
       WEB_URL: http://localhost:3000
       ADMIN_URL: http://localhost:3002
-      NODE_ENV: development
       # Cloudflare's always-pass test secret
       TURNSTILE_SECRET_KEY: 1x0000000000000000000000000000000AA
     ports:
