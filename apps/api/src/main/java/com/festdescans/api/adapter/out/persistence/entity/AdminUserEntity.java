@@ -5,7 +5,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
-/** Read-only for the api: admin users are created with SQL (see apps/api/dev/seed.sql). */
+/** Read-only for the api: admin users are created with SQL. */
 @Entity
 @Table(name = "AdminUser")
 public class AdminUserEntity {

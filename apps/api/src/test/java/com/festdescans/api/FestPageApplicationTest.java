@@ -2,11 +2,9 @@ package com.festdescans.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.festdescans.api.adapter.out.password.Argon2PasswordHasher;
 import com.festdescans.api.adapter.out.persistence.EmbeddedPostgresDatabase;
 import com.jayway.jsonpath.JsonPath;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,8 +17,8 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 /**
- * The whole application (all adapters, real wiring, Flyway) against a real PostgreSQL, seeded with
- * apps/api/dev/seed.sql. One test walks the main flows of the public site and the back office.
+ * The whole application (all adapters, real wiring, Flyway) against a real PostgreSQL. One test walks the
+ * main flows of the public site and the back office.
  */
 @SpringBootTest(classes = FestPageApplication.class, properties = "festpage.web.jwt-secret=end-to-end-test-secret-0123456789abcdef")
 @AutoConfigureMockMvc
@@ -42,23 +40,19 @@ class FestPageApplicationTest {
 
     @Test
     void publicSiteAndBackOfficeWorkEndToEnd() throws Exception {
-        jdbc.sql(Files.readString(Path.of("dev/seed.sql"))).update();
+        assertThat(mvc.get().uri("/api/products")).hasStatusOk().bodyJson().extractingPath("$.total").isEqualTo(0);
 
-        // Public catalogue (seeded products, featured first).
-        MvcTestResult catalogue = mvc.get().uri("/api/products").exchange();
-        assertThat(catalogue).hasStatusOk().bodyJson().extractingPath("$.total").isEqualTo(6);
-        assertThat(catalogue).bodyJson().extractingPath("$.data[0].featured").isEqualTo(true);
-        assertThat(mvc.get().uri("/api/products?category=PILLOW")).bodyJson().extractingPath("$.total").isEqualTo(2);
-        assertThat(mvc.get().uri("/api/products/colchon-comfort-plus")).hasStatusOk().bodyJson()
-                .extractingPath("$.price").isEqualTo(649.99);
-
-        // Back-office login with the seeded admin (Argon2 hash in seed.sql).
+        // Back-office login (admin users are created with SQL, as in production).
+        jdbc.sql("""
+                insert into "AdminUser" (id, email, "passwordHash", name, "updatedAt")
+                values ('cadmin1', 'admin@festdescans.com', ?, 'Admin', now())""")
+                .param(new Argon2PasswordHasher().hash("s3cret-password")).update();
         MvcTestResult login = mvc.post().uri("/api/admin/auth/login").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"admin@festpage.com\",\"password\":\"admin123!\"}").exchange();
+                .content("{\"email\":\"admin@festdescans.com\",\"password\":\"s3cret-password\"}").exchange();
         assertThat(login).hasStatusOk();
         String bearer = "Bearer " + JsonPath.read(login.getResponse().getContentAsString(), "$.token");
         assertThat(mvc.get().uri("/api/admin/auth/me").header("Authorization", bearer)).hasStatusOk().bodyJson()
-                .extractingPath("$.email").isEqualTo("admin@festpage.com");
+                .extractingPath("$.email").isEqualTo("admin@festdescans.com");
 
         // Create a product with sizes.
         MvcTestResult created = mvc.post().uri("/api/admin/products").header("Authorization", bearer)
@@ -121,14 +115,5 @@ class FestPageApplicationTest {
         for (String path : new String[] {"/env", "/beans", "/configprops", "/info", "/actuator/health", "/actuator"}) {
             assertThat(mvc.get().uri(path)).as(path).hasStatus(404);
         }
-    }
-
-    @Test
-    void theSeedScriptIsIdempotent() throws IOException {
-        String seed = Files.readString(Path.of("dev/seed.sql"));
-        jdbc.sql(seed).update();
-        jdbc.sql(seed).update();
-
-        assertThat(jdbc.sql("select count(*) from \"AdminUser\"").query(Integer.class).single()).isEqualTo(1);
     }
 }

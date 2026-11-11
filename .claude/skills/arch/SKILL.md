@@ -12,7 +12,7 @@ apps/
   web/      Next.js (App Router) — public site, Catalan/Spanish        → festdescans.com
   admin/    Next.js (App Router) — back office (products, orders, contacts) → admin.festdescans.com
   api/      Java + Spring Boot, hexagonal, Gradle — REST API used by web and admin → api.festdescans.com
-            (Flyway migrations in apps/api/src/main/resources/db/migration; dev data in apps/api/dev/seed.sql)
+            (Flyway migrations in apps/api/src/main/resources/db/migration)
 packages/
   types/    Shared TypeScript types (no runtime code); keep in sync with the api's response records
   ui/       Shared React components (Button, Badge, Card, ProductCard, Spinner)

@@ -92,8 +92,7 @@ jobs:
           load: true
           tags: festpage-${{ matrix.app }}:pr
           cache-from: type=gha,scope=${{ matrix.app }}
-      # Runs the api image the way the cluster does, against a real PostgreSQL (it migrates on startup);
-      # then logs in with an Argon2 hash and a JWT through the image.
+      # Runs the api image the way the cluster does, against a real PostgreSQL (it migrates on startup).
       - name: Smoke test api image
         if: matrix.app == 'api'
         env:
@@ -130,12 +129,6 @@ jobs:
           curl -fsS localhost:3001/health | grep -q '"status":"UP"'   # includes the database check
           curl -fsS localhost:3001/api/products | tee /dev/stderr | grep -q '"total":0'
 
-          # Dev seed: an admin with an Argon2 hash, and 6 products.
-          docker exec -i pg psql -v ON_ERROR_STOP=1 -U festpage -d festpage < apps/api/dev/seed.sql
-          curl -fsS localhost:3001/api/products | grep -q '"total":6'
-          token=$(curl -fsS -X POST localhost:3001/api/admin/auth/login -H 'content-type: application/json' \
-            -d '{"email":"admin@festpage.com","password":"admin123!"}' | jq -r .token)
-          curl -fsS localhost:3001/api/admin/auth/me -H "authorization: Bearer $token" | grep -q admin@festpage.com
           test "$(curl -s -o /dev/null -w '%{http_code}' localhost:3001/api/admin/orders)" = 401
           docker stats --no-stream --format 'api memory: {{.MemUsage}}' api
           echo "api image ok"

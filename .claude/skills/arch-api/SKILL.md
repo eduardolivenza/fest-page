@@ -67,7 +67,7 @@ Origins from `WEB_URL` and `ADMIN_URL` (`festpage.web.cors-origins`, chart `cors
 - Production was created by Prisma, so `application.yml` has `spring.flyway.baseline-on-migrate: true` and `baseline-version: 1`: on that database Flyway only records a baseline at V1 (`PrismaBaselineTest`); an empty database runs V1. New changes start at `V2__...`. `_prisma_migrations` stays in the DB, unused.
 - **Migrations must be backwards compatible** with the previous api version (rolling update): add columns nullable/with default; drop or rename in a later release. Never edit an applied migration.
 - Identifiers are Prisma's quoted camelCase (`"Product"."createdAt"`): `PersistenceConfiguration` sets the standard physical naming strategy and globally quoted identifiers. Postgres enums `ProductCategory`/`OrderStatus` map with `@JdbcTypeCode(SqlTypes.NAMED_ENUM)`; keep the Java enums, the SQL enums and `packages/types` in sync.
-- Local data: `apps/api/dev/seed.sql` (admin `admin@festpage.com` / `admin123!` + 6 products).
+- Admin users are created with SQL (there is no endpoint): insert into `"AdminUser"` with an Argon2id hash.
 
 ## Tests (JUnit 5 / Jupiter, AssertJ)
 
@@ -79,8 +79,8 @@ Origins from `WEB_URL` and `ADMIN_URL` (`festpage.web.cors-origins`, chart `cors
 | `adapter/in/web` | `@SpringBootTest` + `MockMvcTester` through the real services and the in-memory database, no DB (the old Fastify `inject` + fake Prisma tests): `PublicApiTest`, `AdminApiTest`, `SecurityTest` (incl. a token signed by the Node api) |
 | `adapter/out/persistence` | real **PostgreSQL 18** (zonky embedded binaries, no Docker; `EmbeddedPostgresDatabase`, one fresh DB per class): JPA adapters |
 | `adapter/out/password`, `adapter/out/turnstile` | Argon2 against a node-argon2 hash; Turnstile against a local `HttpServer` |
-| root | `ApplicationStartupTest` (starts through `main()` on a real port, every use case wired, refuses to start without `JWT_SECRET`), `FestPageApplicationTest` (end to end with `dev/seed.sql`, health groups, endpoint exposure), `PrismaBaselineTest`, `HexagonalArchitectureTest` |
+| root | `ApplicationStartupTest` (starts through `main()` on a real port, every use case wired, refuses to start without `JWT_SECRET`), `FestPageApplicationTest` (end to end, health groups, endpoint exposure), `PrismaBaselineTest`, `HexagonalArchitectureTest` |
 
 Test-only Spring setups (`WebTestBase.App`, `PersistenceAdaptersTest.App`) are deliberately plain classes (no `@Configuration`), so the app's component scan never picks them up.
 
-Every new endpoint gets: happy path, validation 400, auth 401 (admin), and its error mapping (404/409). The `Image (api)` PR check also runs the image against the production Postgres image (migrations on startup, seed, login).
+Every new endpoint gets: happy path, validation 400, auth 401 (admin), and its error mapping (404/409). The `Image (api)` PR check also runs the image against the production Postgres image (migrations on startup, health, public and admin endpoints).

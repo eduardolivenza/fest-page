@@ -21,7 +21,7 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile
     environment:
-      # Flyway migrates the schema when the api starts. Sample data: apps/api/dev/seed.sql
+      # Flyway migrates the schema when the api starts.
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/festpage
       SPRING_DATASOURCE_USERNAME: festpage
       SPRING_DATASOURCE_PASSWORD: festpage_dev
