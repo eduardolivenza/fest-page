@@ -128,11 +128,12 @@ jobs:
             -e SPRING_DATASOURCE_PASSWORD festpage-api:pr \
             java -XX:MaxRAMPercentage=50 -XX:+UseSerialGC -cp app.jar com.festdescans.api.MigrateDatabase; }
           retry 15 migrate
-          second=$(migrate) && grep -q '0 migration(s) applied' <<<"$second"
+          second=$(migrate) && grep -q 'No migration necessary' <<<"$second"
 
           docker run -d --name api --network host -m 512m -e SPRING_DATASOURCE_URL -e SPRING_DATASOURCE_USERNAME \
             -e SPRING_DATASOURCE_PASSWORD -e JWT_SECRET=ci-smoke-test-jwt-secret-0123456789abcdef festpage-api:pr
-          retry 60 curl -fsS localhost:3001/health
+          retry 60 curl -fsS localhost:3001/health/readiness
+          curl -fsS localhost:3001/health | grep -q '"status":"UP"'   # includes the database check
           curl -fsS localhost:3001/api/products | tee /dev/stderr | grep -q '"total":0'
 
           # Dev seed: an admin with an Argon2 hash, and 6 products.

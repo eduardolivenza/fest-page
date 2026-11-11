@@ -1,7 +1,6 @@
 package com.festdescans.api.adapter.out.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,15 +9,33 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import javax.sql.DataSource;
-import org.flywaydb.core.api.output.MigrateResult;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
-class DatabaseMigrationsTest {
+/** Boot's Flyway auto-configuration with our defaults and Prisma guard, on a real PostgreSQL. */
+class FlywayMigrationTest {
 
     private static final List<String> PRISMA_ORDER =
             List.of("20260524132142_test_1", "20260524133555_v2", "20260525081137_v3");
+
+    private static ApplicationContextRunner migrating(EmbeddedPostgresDatabase db) {
+        return new ApplicationContextRunner()
+                .withConfiguration(AutoConfigurations.of(DataSourceAutoConfiguration.class, FlywayAutoConfiguration.class))
+                .withUserConfiguration(FlywayMigrationConfiguration.class)
+                .withPropertyValues("spring.datasource.url=" + db.jdbcUrl(),
+                        "spring.datasource.username=" + db.username(), "spring.datasource.password=" + db.password());
+    }
+
+    private static List<Map<String, Object>> history(DataSource ds) {
+        return JdbcClient.create(ds).sql("select version, type from flyway_schema_history order by installed_rank")
+                .query().listOfRows();
+    }
 
     @Test
     void runsOnTheSamePostgresMajorAsProduction() {
@@ -27,73 +44,69 @@ class DatabaseMigrationsTest {
 
     @Test
     void createsTheSchemaInAnEmptyDatabase() {
-        DataSource ds = EmbeddedPostgresDatabase.create().dataSource();
+        EmbeddedPostgresDatabase db = EmbeddedPostgresDatabase.create();
 
-        MigrateResult result = DatabaseMigrations.migrate(ds);
+        migrating(db).run(ctx -> assertThat(ctx).hasNotFailed());
+        migrating(db).run(ctx -> assertThat(ctx).as("idempotent").hasNotFailed());
 
-        assertThat(result.migrationsExecuted).isEqualTo(3);
+        DataSource ds = db.dataSource();
+        assertThat(history(ds)).extracting(r -> r.get("version")).containsExactly("1", "2", "3");
         JdbcClient jdbc = JdbcClient.create(ds);
         assertThat(columns(jdbc, "Product")).contains("createdAt", "featured").doesNotContain("stock");
         assertThat(columns(jdbc, "ProductSize")).contains("width", "length", "price", "productId");
-        assertThat(DatabaseMigrations.migrate(ds).migrationsExecuted).as("idempotent").isZero();
     }
 
     @Test
     void baselinesADatabaseCreatedByPrismaWithoutTouchingItsData() {
-        DataSource ds = EmbeddedPostgresDatabase.create().dataSource();
+        EmbeddedPostgresDatabase db = EmbeddedPostgresDatabase.create();
+        DataSource ds = db.dataSource();
         createPrismaDatabase(ds, PRISMA_ORDER);
-        JdbcClient jdbc = JdbcClient.create(ds);
-        jdbc.sql("""
+        JdbcClient.create(ds).sql("""
                 insert into "Product" (id, name, slug, price, category, "updatedAt")
                 values ('cprod1', 'Matalàs', 'matalas', 499.90, 'MATTRESS', now())""").update();
 
-        MigrateResult result = DatabaseMigrations.migrate(ds);
+        migrating(db).run(ctx -> assertThat(ctx).hasNotFailed());
+        migrating(db).run(ctx -> assertThat(ctx).hasNotFailed());
 
-        assertThat(result.migrationsExecuted).isZero();
-        assertThat(jdbc.sql("select version, type from flyway_schema_history").query().listOfRows())
-                .singleElement()
-                .satisfies(row -> {
-                    assertThat(row.get("version")).isEqualTo("3");
-                    assertThat(row.get("type")).isEqualTo("BASELINE");
-                });
-        assertThat(jdbc.sql("select name from \"Product\" where id = 'cprod1'").query(String.class).single())
-                .isEqualTo("Matalàs");
-        assertThat(DatabaseMigrations.migrate(ds).migrationsExecuted).isZero();
+        assertThat(history(ds)).singleElement().satisfies(row -> {
+            assertThat(row.get("version")).isEqualTo("3");
+            assertThat(row.get("type")).isEqualTo("BASELINE");
+        });
+        assertThat(JdbcClient.create(ds).sql("select name from \"Product\" where id = 'cprod1'").query(String.class)
+                .single()).isEqualTo("Matalàs");
     }
 
     @Test
     void refusesToBaselineWhenAPrismaMigrationIsMissing() {
-        DataSource ds = EmbeddedPostgresDatabase.create().dataSource();
-        createPrismaDatabase(ds, PRISMA_ORDER.subList(0, 2));
+        EmbeddedPostgresDatabase db = EmbeddedPostgresDatabase.create();
+        createPrismaDatabase(db.dataSource(), PRISMA_ORDER.subList(0, 2));
 
-        assertThatThrownBy(() -> DatabaseMigrations.migrate(ds))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("20260525081137_v3");
-        assertThat(tableExists(ds, "flyway_schema_history")).isFalse();
+        migrating(db).run(ctx -> assertThat(ctx).hasFailed().getFailure()
+                .rootCause().hasMessageContaining("20260525081137_v3"));
+        assertThat(tableExists(db.dataSource(), "flyway_schema_history")).isFalse();
     }
 
     @Test
     void refusesToBaselineWhenPrismaHasAnUnknownMigration() {
-        DataSource ds = EmbeddedPostgresDatabase.create().dataSource();
-        createPrismaDatabase(ds, PRISMA_ORDER);
-        recordPrismaMigration(JdbcClient.create(ds), "20261201000000_newer");
+        EmbeddedPostgresDatabase db = EmbeddedPostgresDatabase.create();
+        createPrismaDatabase(db.dataSource(), PRISMA_ORDER);
+        recordPrismaMigration(JdbcClient.create(db.dataSource()), "20261201000000_newer");
 
-        assertThatThrownBy(() -> DatabaseMigrations.migrate(ds)).isInstanceOf(IllegalStateException.class);
+        migrating(db).run(ctx -> assertThat(ctx).hasFailed());
+        assertThat(tableExists(db.dataSource(), "flyway_schema_history")).isFalse();
     }
 
     @Test
     void refusesToBaselineASchemaWithoutAnyHistory() {
-        DataSource ds = EmbeddedPostgresDatabase.create().dataSource();
-        JdbcClient.create(ds).sql("create table something_else (id int)").update();
+        EmbeddedPostgresDatabase db = EmbeddedPostgresDatabase.create();
+        JdbcClient.create(db.dataSource()).sql("create table something_else (id int)").update();
 
-        assertThatThrownBy(() -> DatabaseMigrations.migrate(ds))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("neither a Flyway nor a Prisma history");
+        migrating(db).run(ctx -> assertThat(ctx).hasFailed().getFailure()
+                .rootCause().hasMessageContaining("neither a Flyway nor a Prisma history"));
     }
 
     /** What production looks like: the Prisma SQL applied and recorded in _prisma_migrations. */
     private static void createPrismaDatabase(DataSource ds, List<String> recorded) {
-        JdbcClient jdbc = JdbcClient.create(ds);
         for (String script : List.of("V1__init.sql", "V2__product_sizes.sql", "V3__drop_product_stock.sql")) {
             try (Connection c = ds.getConnection()) {
                 c.createStatement().execute(resource("db/migration/" + script));
@@ -101,6 +114,7 @@ class DatabaseMigrationsTest {
                 throw new IllegalStateException(e);
             }
         }
+        JdbcClient jdbc = JdbcClient.create(ds);
         jdbc.sql("""
                 CREATE TABLE "_prisma_migrations" (
                     "id" VARCHAR(36) PRIMARY KEY NOT NULL,
@@ -132,7 +146,7 @@ class DatabaseMigrationsTest {
     }
 
     private static String resource(String path) {
-        try (InputStream in = DatabaseMigrationsTest.class.getClassLoader().getResourceAsStream(path)) {
+        try (InputStream in = FlywayMigrationTest.class.getClassLoader().getResourceAsStream(path)) {
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new UncheckedIOException(e);

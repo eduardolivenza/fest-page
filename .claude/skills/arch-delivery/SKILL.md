@@ -20,14 +20,14 @@ Claude cannot push to main or touch the cluster: work on a branch, push it, give
 
 - **Checks**: version pins (`scripts/check-versions.mjs`), `pnpm install --frozen-lockfile`, typecheck, all tests, build web/admin, and the api's `./gradlew build` (JDK 25; includes the embedded-PostgreSQL tests).
 - **Checks** also runs `helm lint` + `helm template` on every chart in `helm/`.
-- **Image (api|web|admin)**: Docker build without push. The api job also starts the production Postgres image with the chart's init script and settings (app user not a superuser), runs the migrate initContainer command twice (`java -cp app.jar com.festdescans.api.MigrateDatabase`, second run must be a no-op), starts the server with a 512m memory cap, calls `/health` and `/api/products`, loads `apps/api/dev/seed.sql` and logs in (Argon2 + JWT) through the image.
+- **Image (api|web|admin)**: Docker build without push. The api job also starts the production Postgres image with the chart's init script and settings (app user not a superuser), runs the migrate initContainer command twice (`java -cp app.jar com.festdescans.api.MigrateDatabase`, second run must log `No migration necessary`), starts the server with a 512m memory cap, calls `/health/readiness`, `/health` (includes the DB) and `/api/products`, loads `apps/api/dev/seed.sql` and logs in (Argon2 + JWT) through the image.
 - They run on every PR without path filters, so the required checks always report. Intended ruleset on `main` (configured in GitHub settings, not in the repo): PR required, these checks required, branch up to date, GitHub Actions in the bypass list (for the tag-bump commits).
 - Never merge with red or pending checks; never "fix" a check by weakening it without saying so.
 
 ## Docker images
 
 web/admin: multi-stage (`base` → `deps` → `builder` → `runner`), `node:<pinned>-alpine`, non-root `appuser`, `--mount=type=cache` pnpm store at `/pnpm/store`, Next standalone `server.js`.
-api: `eclipse-temurin:<pinned>-jdk-alpine` builder (`./gradlew :bootstrap:bootJar`, Gradle cache mount, no tests) → `-jre-alpine` runner with the extracted jar in `/app` (`app.jar` + `lib/`), non-root `appuser`, JVM flags in `CMD` sized for the 512Mi limit (heap 60%, SerialGC). The same image runs the migrate initContainer (`MigrateDatabase`, no Spring). Measured: ~300Mi RSS, ~9s start on one fast core (slower on the server: the chart has a 3-minute `startupProbe`).
+api: `eclipse-temurin:<pinned>-jdk-alpine` builder (`./gradlew :bootstrap:bootJar`, Gradle cache mount, no tests) → `-jre-alpine` runner with the extracted jar in `/app` (`app.jar` + `lib/`), non-root `appuser`, JVM flags in `CMD` sized for the 512Mi limit (heap 60%, SerialGC). The same image runs the migrate initContainer (`MigrateDatabase`: Spring with only DataSource + Flyway, ~2s, ~170Mi). Probes: startup/liveness `/health/liveness`, readiness `/health/readiness` (Actuator). Measured: ~300Mi RSS, ~9s start on one fast core (slower on the server: the chart has a 3-minute `startupProbe`).
 Cross-stage `COPY --from=` sources must be **absolute**. Test files, `vitest.config.*` and the api's `build/`, `.gradle/`, `src/test`, `src/testFixtures` are excluded via `.dockerignore`.
 
 ## Runtime config
@@ -56,6 +56,6 @@ Tunnel routes in the homelab repo (`components/cloudflared/values.yaml`): `festd
 
 ```bash
 kubectl -n fest-descans get pods -o custom-columns=NAME:.metadata.name,IMAGE:.spec.containers[0].image,STATUS:.status.phase
-kubectl -n fest-descans logs deploy/fest-descans-api -c migrate | tail -3   # "Database migrated: 0 migration(s) applied..."
+kubectl -n fest-descans logs deploy/fest-descans-api -c migrate | tail -3   # "... No migration necessary." then "Database schema at version N"
 ```
-`/health` does not touch the DB, so also check a real endpoint (`curl -s https://api.festdescans.com/api/products | head -c 200`) and the admin login.
+`/health/liveness` and `/health/readiness` do not touch the DB (`/health` does), so also check a real endpoint (`curl -s https://api.festdescans.com/api/products | head -c 200`) and the admin login.

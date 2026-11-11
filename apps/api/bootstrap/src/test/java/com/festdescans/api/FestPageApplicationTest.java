@@ -108,6 +108,22 @@ class FestPageApplicationTest {
     }
 
     @Test
+    void healthGroupsForTheKubernetesProbes() {
+        assertThat(mvc.get().uri("/health/liveness")).hasStatusOk().bodyJson().isStrictlyEqualTo("{\"status\":\"UP\"}");
+        assertThat(mvc.get().uri("/health/readiness")).hasStatusOk().bodyJson().isStrictlyEqualTo("{\"status\":\"UP\"}");
+        // Overall health includes the database, without exposing details.
+        assertThat(mvc.get().uri("/health")).hasStatusOk().bodyJson().isLenientlyEqualTo("{\"status\":\"UP\"}");
+        assertThat(mvc.get().uri("/health")).bodyJson().doesNotHavePath("$.components");
+    }
+
+    @Test
+    void onlyTheHealthEndpointIsExposed() {
+        for (String path : new String[] {"/env", "/beans", "/configprops", "/info", "/actuator/health", "/actuator"}) {
+            assertThat(mvc.get().uri(path)).as(path).hasStatus(404);
+        }
+    }
+
+    @Test
     void theSeedScriptIsIdempotent() throws IOException {
         String seed = Files.readString(Path.of("../dev/seed.sql"));
         jdbc.sql(seed).update();

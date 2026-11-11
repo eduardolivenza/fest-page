@@ -44,9 +44,9 @@ spec:
         - name: migrate
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          # Flyway migrations (apps/api/adapter-out-persistence/src/main/resources/db/migration), without
-          # starting Spring. Retries until PostgreSQL is ready. The first run on the Prisma-created database
-          # only records a baseline (V3) after checking _prisma_migrations: no schema change.
+          # Flyway migrations (apps/api/adapter-out-persistence/src/main/resources/db/migration) through a
+          # minimal Spring context (DataSource + Flyway only). Retries until PostgreSQL is ready. The first run
+          # on the Prisma-created database only records a baseline (V3) after checking _prisma_migrations.
           command:
             - sh
             - -c
@@ -87,21 +87,23 @@ spec:
               value: {{ .Values.cors.webUrl | quote }}
             - name: ADMIN_URL
               value: {{ .Values.cors.adminUrl | quote }}
+          # Spring Boot Actuator health groups. Liveness never checks the database (a PostgreSQL restart must
+          # not restart the api); readiness goes DOWN during graceful shutdown.
           # The JVM needs a while to start on this server: liveness/readiness only begin once it answers.
           startupProbe:
             httpGet:
-              path: /health
+              path: /health/liveness
               port: {{ .Values.service.port }}
             periodSeconds: 5
             failureThreshold: 36 # 3 minutes
           readinessProbe:
             httpGet:
-              path: /health
+              path: /health/readiness
               port: {{ .Values.service.port }}
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /health
+              path: /health/liveness
               port: {{ .Values.service.port }}
             periodSeconds: 30
             failureThreshold: 3

@@ -25,6 +25,22 @@ server:
   port: ${PORT:3001}
   shutdown: graceful
 
+# Actuator, health only (the default exposure), served at /health instead of /actuator/health:
+#   /health            overall status, includes the database      (monitoring)
+#   /health/liveness   process is alive, never checks the database (Kubernetes livenessProbe/startupProbe)
+#   /health/readiness  accepting traffic; DOWN while shutting down  (Kubernetes readinessProbe)
+management:
+  endpoints:
+    web:
+      base-path: /
+      path-mapping:
+        health: health
+  endpoint:
+    health:
+      # Kubernetes is auto-detected, but enable the groups everywhere (CI smoke test, docker compose).
+      probes:
+        enabled: true
+
 festpage:
   web:
     # At least 32 bytes. Required: the app refuses to start without it.

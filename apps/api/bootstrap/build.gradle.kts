@@ -11,7 +11,8 @@ dependencies {
     implementation(project(":adapter-out-password"))
     implementation(libs.spring.boot.starter.webmvc)
     implementation(libs.spring.boot.starter.data.jpa)
-    implementation(libs.flyway.core)
+    // Health groups for the Kubernetes probes (/health/liveness, /health/readiness).
+    implementation(libs.spring.boot.starter.actuator)
 
     testImplementation(testFixtures(project(":adapter-out-persistence")))
     testImplementation(libs.spring.boot.starter.test)

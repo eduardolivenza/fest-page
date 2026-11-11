@@ -1,12 +1,11 @@
 package com.festdescans.api.adapter.out.persistence;
 
-import javax.sql.DataSource;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
 import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
-import org.springframework.boot.jpa.autoconfigure.EntityManagerFactoryDependsOnPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * PostgreSQL adapter. The schema came from Prisma: quoted camelCase identifiers ("Product"."createdAt"),
@@ -14,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration(proxyBeanMethods = false)
 @ComponentScan(basePackageClasses = PersistenceConfiguration.class)
+@Import(FlywayMigrationConfiguration.class)
 public class PersistenceConfiguration {
 
     @Bean
@@ -26,22 +26,5 @@ public class PersistenceConfiguration {
             // No hibernate.jdbc.time_zone: entities hold UTC wall time as LocalDateTime (EntityMapper), and that
             // setting would shift it by the JVM's zone. PersistenceAdaptersTest checks the stored value.
         };
-    }
-
-    /** Runs the Flyway migrations while the context starts, before the server accepts requests. */
-    @Bean
-    MigrationsApplied databaseMigrations(DataSource dataSource) {
-        DatabaseMigrations.migrate(dataSource);
-        return new MigrationsApplied();
-    }
-
-    /** Hibernate starts only once the schema is up to date. */
-    @Bean
-    static EntityManagerFactoryDependsOnPostProcessor entityManagerFactoryAfterMigrations() {
-        return new EntityManagerFactoryDependsOnPostProcessor("databaseMigrations");
-    }
-
-    /** Marker bean: exists once the schema is up to date. */
-    public record MigrationsApplied() {
     }
 }

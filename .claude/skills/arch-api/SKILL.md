@@ -13,11 +13,11 @@ Java 25, Spring Boot 4 (Spring MVC, Spring Security, Spring Data JPA/Hibernate),
 domain                   records + business rules, pure Java (no Spring, no JPA)
 application              use cases: port/in (interfaces), port/out (interfaces), service/ (plain Java)
 adapter-in-web           REST controllers, request/response records, Bean Validation, errors, JWT security, CORS, OpenAPI
-adapter-out-persistence  JPA entities + Spring Data repos implementing port/out, Flyway migrations, cuid ids, transactions
+adapter-out-persistence  JPA entities + Spring Data repos implementing port/out, Flyway migrations (Boot auto-config), cuid ids, transactions
 adapter-out-turnstile    CaptchaVerifier over the JDK HttpClient (plain Java)
 adapter-out-password     PasswordVerifier: Argon2id PHC hashes with BouncyCastle (plain Java)
 bootstrap                FestPageApplication, UseCaseConfiguration (wires services to adapters), application.yml,
-                         MigrateDatabase (initContainer entry point)
+                         Actuator health, MigrateDatabase (initContainer entry point)
 ```
 
 The compiler enforces the dependency rule: `domain` ← `application` ← adapters ← `bootstrap`. Adapters never depend on each other. Application services have no Spring annotations; `bootstrap/UseCaseConfiguration` creates them as beans.
@@ -33,7 +33,7 @@ The compiler enforces the dependency rule: `domain` ← `application` ← adapte
 | `/api/admin/products` | `product/AdminProductController` | `GET /`, `GET /{id}`, `POST /`, `PUT /{id}` (partial; `sizes` replaces all), `DELETE /{id}` |
 | `/api/admin/orders` | `order/AdminOrderController` | `GET /` (`?status=`), `PATCH /{id}/status` |
 | `/api/admin/contacts` | `contact/AdminContactController` | `GET /` (`?read=`), `PATCH /{id}/read`, `DELETE /{id}` |
-| `/health` | `HealthController` | liveness/readiness/startup probe (does **not** touch the DB) |
+| `/health`, `/health/liveness`, `/health/readiness` | Spring Boot Actuator (`management.*` in `application.yml`, base path `/`) | overall status incl. DB / liveness (startup + liveness probes, never the DB) / readiness (DOWN during shutdown). Only `health` is exposed. |
 | `/docs`, `/docs/json` | springdoc | Swagger UI / OpenAPI JSON (public) |
 
 ## Conventions
@@ -62,8 +62,9 @@ Origins from `WEB_URL` and `ADMIN_URL` (`festpage.web.cors-origins`, chart `cors
 
 ## Database and migrations
 
-- **Flyway owns the schema**: `adapter-out-persistence/src/main/resources/db/migration/V<n>__<what>.sql`. V1–V3 are the three former Prisma migrations, unchanged. Production was created by Prisma: the first Java deploy records a **baseline at V3** after `DatabaseMigrations` checks that `_prisma_migrations` contains exactly those three (otherwise it refuses). `_prisma_migrations` stays in the DB, unused.
-- Migrations run in the pod's `migrate` initContainer (`java -cp app.jar com.festdescans.api.MigrateDatabase`, no Spring) and again (no-op) when the app starts.
+- **Flyway owns the schema**: `adapter-out-persistence/src/main/resources/db/migration/V<n>__<what>.sql`. V1–V3 are the three former Prisma migrations, unchanged. Production was created by Prisma: the first Java deploy records a **baseline at V3** after `PrismaBaselineGuard` checks that `_prisma_migrations` contains exactly those three (otherwise it refuses). `_prisma_migrations` stays in the DB, unused.
+- **Boot's Flyway auto-configuration** runs them (before Hibernate). `FlywayMigrationConfiguration` adds `db/flyway-defaults.properties` (baseline-on-migrate, baseline version 3) and a `FlywayMigrationStrategy` that runs `PrismaBaselineGuard` before `migrate()`.
+- Migrations run in the pod's `migrate` initContainer (`java -cp app.jar com.festdescans.api.MigrateDatabase`: a Spring context with only DataSource + Flyway, no web/JPA/JWT_SECRET, ~2s) and again (no-op) when the app starts.
 - **Migrations must be backwards compatible** with the previous api version (rolling update): add columns nullable/with default; drop or rename in a later release. Never edit an applied migration.
 - Identifiers are Prisma's quoted camelCase (`"Product"."createdAt"`): `PersistenceConfiguration` sets the standard physical naming strategy and globally quoted identifiers. Postgres enums `ProductCategory`/`OrderStatus` map with `@JdbcTypeCode(SqlTypes.NAMED_ENUM)`; keep the Java enums, the SQL enums and `packages/types` in sync.
 - Local data: `apps/api/dev/seed.sql` (admin `admin@festpage.com` / `admin123!` + 6 products).
@@ -76,8 +77,8 @@ Origins from `WEB_URL` and `ADMIN_URL` (`festpage.web.cors-origins`, chart `cors
 |---|---|
 | `domain`, `application` | plain unit tests; services against `application` **testFixtures** (`InMemoryDatabase` implements every repository port, `RecordingCaptchaVerifier`, `SequentialIdGenerator`, `MutableClock`, `Fixtures`) |
 | `adapter-in-web` | `@SpringBootTest` + `MockMvcTester` through the real services and the in-memory database (the old Fastify `inject` + fake Prisma tests): `PublicApiTest`, `AdminApiTest`, `SecurityTest` (incl. a token signed by the Node api) |
-| `adapter-out-persistence` | real **PostgreSQL 18** (zonky embedded binaries, no Docker; `EmbeddedPostgresDatabase` test fixture, one fresh DB per class): JPA adapters, Flyway, Prisma baseline scenarios |
+| `adapter-out-persistence` | real **PostgreSQL 18** (zonky embedded binaries, no Docker; `EmbeddedPostgresDatabase` test fixture, one fresh DB per class): JPA adapters; Flyway + Prisma baseline scenarios through Boot's auto-configuration (`ApplicationContextRunner`) |
 | `adapter-out-password`, `adapter-out-turnstile` | Argon2 against a node-argon2 hash; Turnstile against a local `HttpServer` |
-| `bootstrap` | `FestPageApplicationTest`: the whole app + Flyway + `dev/seed.sql` on embedded PostgreSQL, end to end |
+| `bootstrap` | `FestPageApplicationTest`: the whole app + Flyway + `dev/seed.sql` on embedded PostgreSQL, end to end, plus health groups and endpoint exposure; `MigrateDatabaseTest` |
 
 Every new endpoint gets: happy path, validation 400, auth 401 (admin), and its error mapping (404/409). The `Image (api)` PR check also runs the image against the production Postgres image (initContainer command, seed, login).

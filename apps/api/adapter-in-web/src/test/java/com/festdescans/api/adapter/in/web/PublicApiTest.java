@@ -25,15 +25,6 @@ class PublicApiTest extends WebTestBase {
     }
 
     @Nested
-    class Health {
-
-        @Test
-        void returnsOk() {
-            assertThat(mvc.get().uri("/health")).hasStatusOk().bodyJson().isStrictlyEqualTo("{\"status\":\"ok\"}");
-        }
-    }
-
-    @Nested
     class Products {
 
         @Test

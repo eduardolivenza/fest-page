@@ -1,41 +1,39 @@
 package com.festdescans.api;
 
-import ch.qos.logback.classic.Level;
-import com.festdescans.api.adapter.out.persistence.DatabaseMigrations;
-import org.flywaydb.core.api.output.MigrateResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.festdescans.api.adapter.out.persistence.FlywayMigrationConfiguration;
+import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.MigrationInfo;
+import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Import;
 
 /**
- * Applies the Flyway migrations and exits, without starting Spring. Run by the pod's migrate initContainer
- * (in a retry loop until PostgreSQL accepts connections). Exit code 0 on success, 1 on failure.
- *
- * <p>Reads SPRING_DATASOURCE_URL, SPRING_DATASOURCE_USERNAME and SPRING_DATASOURCE_PASSWORD, like the app.
+ * Applies the Flyway migrations and exits: the pod's migrate initContainer runs it in a retry loop until
+ * PostgreSQL accepts connections. Same configuration as the app (application.yml, SPRING_DATASOURCE_* env,
+ * Boot's Flyway auto-configuration, Prisma guard) but only DataSource + Flyway: no web server, JPA or
+ * security, so it needs no JWT_SECRET and starts in a couple of seconds. Exit code 1 on failure.
  */
 public final class MigrateDatabase {
 
     private MigrateDatabase() {
     }
 
-    public static void main(String[] args) {
-        // Without Spring Boot's logging setup Logback would log everything at DEBUG.
-        ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(Level.INFO);
-        try {
-            MigrateResult result = DatabaseMigrations.migrate(
-                    env("SPRING_DATASOURCE_URL"), env("SPRING_DATASOURCE_USERNAME"), env("SPRING_DATASOURCE_PASSWORD"));
-            System.out.printf("Database migrated: %d migration(s) applied, schema version %s%n",
-                    result.migrationsExecuted, result.targetSchemaVersion == null ? "unchanged" : result.targetSchemaVersion);
-        } catch (RuntimeException e) {
-            System.err.println("Migration failed: " + e.getMessage());
-            System.exit(1);
-        }
+    // Deliberately not a @Configuration: component scanning and @SpringBootTest must not pick it up.
+    @ImportAutoConfiguration({DataSourceAutoConfiguration.class, FlywayAutoConfiguration.class})
+    @Import(FlywayMigrationConfiguration.class)
+    static final class Migration {
     }
 
-    private static String env(String name) {
-        String value = System.getenv(name);
-        if (value == null || value.isBlank()) {
-            throw new IllegalStateException(name + " is not set");
+    public static void main(String[] args) {
+        try (ConfigurableApplicationContext context = new SpringApplicationBuilder(Migration.class)
+                .web(WebApplicationType.NONE)
+                .run(args)) {
+            MigrationInfo current = context.getBean(Flyway.class).info().current();
+            System.out.println("Database schema at version " + (current == null ? "none" : current.getVersion()));
         }
-        return value;
     }
 }
