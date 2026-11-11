@@ -3,9 +3,7 @@ package com.festdescans.api.adapter.out.persistence;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
 import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.boot.context.TypeExcludeFilter;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -13,9 +11,7 @@ import org.springframework.context.annotation.Configuration;
  * so names are used exactly as written (no snake_case) and always quoted ("Order" is a reserved word).
  */
 @Configuration(proxyBeanMethods = false)
-// Same exclude filter as @SpringBootApplication: test-only configurations are never scanned.
-@ComponentScan(basePackageClasses = PersistenceConfiguration.class,
-        excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class))
+@ComponentScan(basePackageClasses = PersistenceConfiguration.class)
 public class PersistenceConfiguration {
 
     @Bean

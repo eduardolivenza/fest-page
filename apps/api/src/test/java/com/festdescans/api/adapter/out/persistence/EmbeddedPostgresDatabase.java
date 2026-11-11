@@ -63,12 +63,4 @@ public final class EmbeddedPostgresDatabase {
     public DataSource dataSource() {
         return server.getDatabase("postgres", name);
     }
-
-    public String serverVersion() {
-        try (Connection c = dataSource().getConnection()) {
-            return c.getMetaData().getDatabaseProductVersion();
-        } catch (SQLException e) {
-            throw new IllegalStateException(e);
-        }
-    }
 }
