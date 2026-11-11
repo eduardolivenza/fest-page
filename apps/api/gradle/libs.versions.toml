@@ -5,7 +5,7 @@
 java = "25"
 spring-boot = "4.1.2"
 springdoc = "3.2.0"
-bouncycastle = "1.86"
+bouncycastle = "1.87"
 embedded-postgres = "2.2.2"
 archunit = "1.5.1"
 # Same PostgreSQL as production (helm/api/values.yaml postgresql.image.tag), for the real-database tests.
