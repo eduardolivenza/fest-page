@@ -5,7 +5,6 @@ import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCusto
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 /**
  * PostgreSQL adapter. The schema came from Prisma: quoted camelCase identifiers ("Product"."createdAt"),
@@ -13,7 +12,6 @@ import org.springframework.context.annotation.Import;
  */
 @Configuration(proxyBeanMethods = false)
 @ComponentScan(basePackageClasses = PersistenceConfiguration.class)
-@Import(FlywayMigrationConfiguration.class)
 public class PersistenceConfiguration {
 
     @Bean

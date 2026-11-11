@@ -6,8 +6,8 @@ plugins {
 dependencies {
     implementation(project(":application"))
     implementation(libs.spring.boot.starter.data.jpa)
-    // Boot's Flyway auto-configuration runs the migrations before Hibernate starts.
-    api(libs.spring.boot.starter.flyway)
+    // Boot's Flyway auto-configuration runs db/migration on startup, before Hibernate.
+    implementation(libs.spring.boot.starter.flyway)
     implementation(libs.flyway.postgresql)
     runtimeOnly(libs.postgresql)
 

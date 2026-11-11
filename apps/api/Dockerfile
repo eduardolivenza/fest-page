@@ -18,6 +18,6 @@ ENV TZ=UTC
 USER appuser
 EXPOSE 3001
 # Sized for the 512Mi pod limit: heap at 60% of the container memory, serial GC (1 small pod, least overhead).
-# The migrate initContainer runs `java -cp app.jar com.festdescans.api.MigrateDatabase` instead (helm/api).
+# The app applies the Flyway migrations itself on startup.
 CMD ["java", "-XX:MaxRAMPercentage=60", "-XX:+UseSerialGC", "-Xss512k", "-XX:ReservedCodeCacheSize=64m", \
      "-XX:MaxMetaspaceSize=160m", "-XX:+ExitOnOutOfMemoryError", "-jar", "app.jar"]

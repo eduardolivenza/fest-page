@@ -92,8 +92,8 @@ jobs:
           load: true
           tags: festpage-${{ matrix.app }}:pr
           cache-from: type=gha,scope=${{ matrix.app }}
-      # Runs the api image the way the cluster does: the migrate initContainer command, then the
-      # server against a real PostgreSQL; then logs in with an Argon2 hash and a JWT through the image.
+      # Runs the api image the way the cluster does, against a real PostgreSQL (it migrates on startup);
+      # then logs in with an Argon2 hash and a JWT through the image.
       - name: Smoke test api image
         if: matrix.app == 'api'
         env:
@@ -123,13 +123,7 @@ jobs:
           test "$(docker exec pg psql -U postgres -d festpage -tAc \
             "select rolsuper from pg_roles where rolname = 'festpage'")" = f
 
-          # Exactly what the migrate initContainer runs (helm/api/templates/deployment.yaml); twice: idempotent.
-          migrate() { docker run --rm --network host -e SPRING_DATASOURCE_URL -e SPRING_DATASOURCE_USERNAME \
-            -e SPRING_DATASOURCE_PASSWORD festpage-api:pr \
-            java -XX:MaxRAMPercentage=50 -XX:+UseSerialGC -cp app.jar com.festdescans.api.MigrateDatabase; }
-          retry 15 migrate
-          second=$(migrate) && grep -q 'No migration necessary' <<<"$second"
-
+          # The api applies the Flyway migrations itself on startup.
           docker run -d --name api --network host -m 512m -e SPRING_DATASOURCE_URL -e SPRING_DATASOURCE_USERNAME \
             -e SPRING_DATASOURCE_PASSWORD -e JWT_SECRET=ci-smoke-test-jwt-secret-0123456789abcdef festpage-api:pr
           retry 60 curl -fsS localhost:3001/health/readiness

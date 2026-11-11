@@ -40,30 +40,6 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      initContainers:
-        - name: migrate
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          # Flyway migrations (apps/api/adapter-out-persistence/src/main/resources/db/migration) through a
-          # minimal Spring context (DataSource + Flyway only). Retries until PostgreSQL is ready. The first run
-          # on the Prisma-created database only records a baseline (V3) after checking _prisma_migrations.
-          command:
-            - sh
-            - -c
-            - |
-              until java -XX:MaxRAMPercentage=50 -XX:+UseSerialGC -cp app.jar com.festdescans.api.MigrateDatabase; do
-                echo "Migration failed (PostgreSQL not ready yet?), retrying in 5s..."
-                sleep 5
-              done
-          env:
-            {{- include "api.datasourceEnv" . | nindent 12 }}
-          resources:
-            requests:
-              memory: 128Mi
-              cpu: 100m
-            limits:
-              memory: 256Mi
-              cpu: 500m
       containers:
         - name: api
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -71,7 +47,15 @@ spec:
           ports:
             - containerPort: {{ .Values.service.port }}
           env:
-            {{- include "api.datasourceEnv" . | nindent 12 }}
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/{{ .Values.postgresql.auth.database }}"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: {{ .Values.postgresql.auth.username | quote }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: password
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
@@ -87,8 +71,9 @@ spec:
               value: {{ .Values.cors.webUrl | quote }}
             - name: ADMIN_URL
               value: {{ .Values.cors.adminUrl | quote }}
-          # Spring Boot Actuator health groups. Liveness never checks the database (a PostgreSQL restart must
-          # not restart the api); readiness goes DOWN during graceful shutdown.
+          # The api applies the Flyway migrations on startup, before it reports ready; if PostgreSQL is not up
+          # yet it exits and Kubernetes restarts it.
+          # Actuator health groups: liveness never checks the database, readiness goes DOWN during shutdown.
           # The JVM needs a while to start on this server: liveness/readiness only begin once it answers.
           startupProbe:
             httpGet:
