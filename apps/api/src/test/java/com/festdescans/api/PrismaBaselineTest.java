@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
 /**
  * The first start on production: a database created by Prisma (schema + data, no Flyway history).
- * The app must record a baseline at V3, change nothing, and serve the existing data.
+ * The app must record a baseline at V1, change nothing, and serve the existing data.
  */
 @SpringBootTest(classes = FestPageApplication.class, properties = "festpage.web.jwt-secret=end-to-end-test-secret-0123456789abcdef")
 @AutoConfigureMockMvc
@@ -44,18 +44,16 @@ class PrismaBaselineTest {
     @Test
     void baselinesTheSchemaAndServesTheExistingData() {
         assertThat(jdbc.sql("select version || ' ' || type from flyway_schema_history").query(String.class).list())
-                .containsExactly("3 BASELINE");
+                .containsExactly("1 BASELINE");
         assertThat(mvc.get().uri("/api/products/matalas")).hasStatusOk().bodyJson()
                 .isLenientlyEqualTo("{\"id\":\"cprod1\",\"name\":\"Matalàs\",\"price\":499.90}");
     }
 
-    /** What production looks like before the first Java deploy: the three Prisma migrations, applied by Prisma. */
+    /** What production looks like before the first Java deploy: the V1 schema, created by Prisma. */
     private static EmbeddedPostgresDatabase prismaDatabase() {
         EmbeddedPostgresDatabase db = EmbeddedPostgresDatabase.create();
         DataSource ds = db.dataSource();
-        for (String script : new String[] {"V1__init.sql", "V2__product_sizes.sql", "V3__drop_product_stock.sql"}) {
-            execute(ds, resource("db/migration/" + script));
-        }
+        execute(ds, resource("db/migration/V1__init.sql"));
         execute(ds, """
                 CREATE TABLE "_prisma_migrations" ("id" VARCHAR(36) PRIMARY KEY, "migration_name" VARCHAR(255) NOT NULL);
                 INSERT INTO "_prisma_migrations" VALUES ('1', '20260524132142_test_1'), ('2', '20260524133555_v2'),

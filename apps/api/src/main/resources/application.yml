@@ -21,10 +21,10 @@ spring:
   jpa:
     open-in-view: false
   flyway:
-    # Production was created by Prisma (V1-V3 are its migrations): there Flyway only records a baseline at V3.
-    # An empty database (dev, CI, tests) runs V1-V3.
+    # Production already has the schema of V1 (created by Prisma): there Flyway only records a baseline at V1.
+    # An empty database (dev, CI, tests) runs V1.
     baseline-on-migrate: true
-    baseline-version: 3
+    baseline-version: 1
 
 server:
   port: ${PORT:3001}

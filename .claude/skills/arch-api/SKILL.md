@@ -63,8 +63,8 @@ Origins from `WEB_URL` and `ADMIN_URL` (`festpage.web.cors-origins`, chart `cors
 
 ## Database and migrations
 
-- **Flyway owns the schema**: `src/main/resources/db/migration/V<n>__<what>.sql`, applied by Boot's Flyway auto-configuration when the app starts (before Hibernate and before it reports ready; if PostgreSQL is down the app exits and Kubernetes restarts it). V1–V3 are the three former Prisma migrations, unchanged.
-- Production was created by Prisma, so `application.yml` has `spring.flyway.baseline-on-migrate: true` and `baseline-version: 3`: on that database Flyway only records a baseline at V3 (`PrismaBaselineTest`); an empty database runs V1–V3. `_prisma_migrations` stays in the DB, unused.
+- **Flyway owns the schema**: `src/main/resources/db/migration/V<n>__<what>.sql`, applied by Boot's Flyway auto-configuration when the app starts (before Hibernate and before it reports ready; if PostgreSQL is down the app exits and Kubernetes restarts it). `V1__init.sql` is the schema the three Prisma migrations produced (merged into one script; verified identical).
+- Production was created by Prisma, so `application.yml` has `spring.flyway.baseline-on-migrate: true` and `baseline-version: 1`: on that database Flyway only records a baseline at V1 (`PrismaBaselineTest`); an empty database runs V1. New changes start at `V2__...`. `_prisma_migrations` stays in the DB, unused.
 - **Migrations must be backwards compatible** with the previous api version (rolling update): add columns nullable/with default; drop or rename in a later release. Never edit an applied migration.
 - Identifiers are Prisma's quoted camelCase (`"Product"."createdAt"`): `PersistenceConfiguration` sets the standard physical naming strategy and globally quoted identifiers. Postgres enums `ProductCategory`/`OrderStatus` map with `@JdbcTypeCode(SqlTypes.NAMED_ENUM)`; keep the Java enums, the SQL enums and `packages/types` in sync.
 - Local data: `apps/api/dev/seed.sql` (admin `admin@festpage.com` / `admin123!` + 6 products).

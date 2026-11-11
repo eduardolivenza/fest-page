@@ -1,3 +1,8 @@
+-- The schema as the Prisma migrations left it in production (20260524132142_test_1, 20260524133555_v2,
+-- 20260525081137_v3). Production already has it: there Flyway only records a baseline at version 1
+-- (spring.flyway.baseline-on-migrate). An empty database (dev, CI, tests) runs this script.
+-- Never edit it: schema changes go in V2__..., V3__...
+
 -- CreateEnum
 CREATE TYPE "ProductCategory" AS ENUM ('BED', 'MATTRESS', 'PILLOW', 'ACCESSORY');
 
@@ -12,7 +17,6 @@ CREATE TABLE "Product" (
     "description" TEXT,
     "price" DECIMAL(10,2) NOT NULL,
     "category" "ProductCategory" NOT NULL,
-    "stock" INTEGER NOT NULL DEFAULT 0,
     "featured" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -29,6 +33,17 @@ CREATE TABLE "ProductImage" (
     "productId" TEXT NOT NULL,
 
     CONSTRAINT "ProductImage_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ProductSize" (
+    "id" TEXT NOT NULL,
+    "width" INTEGER NOT NULL,
+    "length" INTEGER NOT NULL,
+    "price" DECIMAL(10,2) NOT NULL,
+    "productId" TEXT NOT NULL,
+
+    CONSTRAINT "ProductSize_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -107,6 +122,9 @@ CREATE INDEX "Product_slug_idx" ON "Product"("slug");
 CREATE INDEX "ProductImage_productId_idx" ON "ProductImage"("productId");
 
 -- CreateIndex
+CREATE INDEX "ProductSize_productId_idx" ON "ProductSize"("productId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Customer_email_key" ON "Customer"("email");
 
 -- CreateIndex
@@ -126,6 +144,9 @@ CREATE UNIQUE INDEX "AdminUser_email_key" ON "AdminUser"("email");
 
 -- AddForeignKey
 ALTER TABLE "ProductImage" ADD CONSTRAINT "ProductImage_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ProductSize" ADD CONSTRAINT "ProductSize_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Order" ADD CONSTRAINT "Order_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "Customer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
