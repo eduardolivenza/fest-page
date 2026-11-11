@@ -3,10 +3,31 @@
   "extends": [
     "config:recommended"
   ],
+  "customManagers": [
+    {
+      "description": "pnpm installed in the Node Dockerfiles must match packageManager in package.json",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^apps/(web|admin)/Dockerfile$/"
+      ],
+      "matchStrings": [
+        "npm install -g pnpm@(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "pnpm",
+      "datasourceTemplate": "npm"
+    }
+  ],
   "vulnerabilityAlerts": {
     "minimumReleaseAge": "1 day"
   },
   "packageRules": [
+    {
+      "description": "One PR for pnpm: packageManager + lockfile + the Dockerfile installs",
+      "matchPackageNames": [
+        "pnpm"
+      ],
+      "groupName": "pnpm"
+    },
     {
       "description": "pnpm 12 rejects packages younger than 1 day (minimumReleaseAge); wait longer before proposing updates",
       "matchDatasources": [
