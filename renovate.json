@@ -15,13 +15,32 @@
       "minimumReleaseAge": "3 days"
     },
     {
-      "description": "The Prisma CLI, client and adapter must stay on the same version",
-      "groupName": "prisma",
+      "description": "api (Gradle/Maven dependencies, Gradle wrapper): same 3-day wait as npm, so a release has time to be pulled or patched",
+      "matchDatasources": [
+        "maven",
+        "gradle-version"
+      ],
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "The api's embedded test PostgreSQL must stay on the production major (helm/api postgresql.image); a major is a planned data migration",
       "matchPackageNames": [
-        "prisma",
-        "@prisma/client",
-        "@prisma/adapter-pg"
-      ]
+        "io.zonky.test.postgres:embedded-postgres-binaries-bom"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Java runs on LTS releases only (25 now): don't propose non-LTS JDK images",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "eclipse-temurin"
+      ],
+      "allowedVersions": "/^25\\./"
     },
     {
       "description": "Major upgrades need code changes: only open a PR when approved in the Dependency Dashboard",

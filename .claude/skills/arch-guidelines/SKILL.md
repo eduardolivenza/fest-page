@@ -13,10 +13,11 @@ The server is small (3.2 GB RAM, HDD) and run by one person. Prefer **simple, bo
 |---|---|
 | New public page | `apps/web/src/app/<route>/page.tsx` (server: metadata) + `_components/<Name>Content.tsx` (client) |
 | New admin page | `apps/admin/src/app/dashboard/<route>/page.tsx` ('use client') + nav entry in `dashboard/layout.tsx` |
-| New endpoint | `apps/api/src/routes/<area>.ts` (public) or `routes/admin/<area>.ts`, registered in `app.ts` with an `/api/...` prefix |
+| New endpoint | use case interface in `application/port/in`, logic in `application/service` (+ domain record methods), controller + request/response records in `adapter-in-web/<area>/` under `/api/...` (admin: `/api/admin/...`); new beans wired in `bootstrap/UseCaseConfiguration` |
+| New outbound dependency (DB table, external API) | port interface in `application/port/out`, implementation in an `adapter-out-*` module (new module for a new technology), in-memory fake in `application` testFixtures |
 | Type shared by API and frontends | `packages/types` |
 | Component used by both frontends | `packages/ui` |
-| Schema change | `packages/db/prisma/schema.prisma` + a migration (`pnpm --filter @festpage/db run migrate`) |
+| Schema change | new `apps/api/adapter-out-persistence/src/main/resources/db/migration/V<n>__<what>.sql` + JPA entity/mapper changes |
 | User-visible text on the public site | `apps/web/src/i18n/messages.ts`, both `ca` and `es` |
 | Runtime config / secret | Helm values / SealedSecret (see `arch-delivery`), never hardcoded |
 
@@ -24,8 +25,9 @@ Don't add a new app, database, cache, queue or external SaaS without discussing 
 
 ## API
 
-- Zod-validate all input; `{ message }` errors with the status codes in `arch-api`; map Prisma `P2025`→404, `P2003`→409.
-- Admin endpoints live under `/api/admin/*` behind `app.authenticate`. Public **write** endpoints need abuse protection (Turnstile, like contacts).
+- Respect the hexagon: `domain` and `application` stay framework-free (no Spring/JPA imports); adapters depend inward only, never on each other. Records for everything except JPA entities; no Lombok.
+- Bean-Validate all input (request records); `{ message }` errors with the status codes in `arch-api`, thrown as domain/application exceptions and mapped in `ApiExceptionHandler` (missing row → `NotFoundException` → 404, conflicts → 409).
+- Admin endpoints live under `/api/admin/*` (protected by `SecurityConfiguration`). Public **write** endpoints need abuse protection (the `CaptchaVerifier` port, like contacts).
 - Never return secrets or password hashes; never log request bodies with personal data.
 - Keep responses shaped like `@festpage/types` (prices as numbers, paginated lists as `{ data, total, page, pageSize, totalPages }`).
 
@@ -33,7 +35,7 @@ Don't add a new app, database, cache, queue or external SaaS without discussing 
 
 - Migrations are applied automatically on deploy, before old pods are gone: make them **backwards compatible** (add nullable/defaulted columns; drop or rename in a later release after the code stops using them).
 - Never edit an applied migration. Never run destructive SQL in production without a `pg_dump` first (homelab skill `fest-descans-postgres`).
-- Keep enums in the Prisma schema and `packages/types` in sync.
+- Keep enums in sync in three places: the Flyway SQL (`CREATE TYPE`), the Java enums in `domain`, and `packages/types`.
 
 ## Frontend
 
@@ -44,15 +46,15 @@ Don't add a new app, database, cache, queue or external SaaS without discussing 
 
 ## Tests and CI
 
-- Every PR passes the PR checks; a change in behaviour comes with a test (API: `app.inject` with the fake Prisma; frontend: Testing Library). Bug fix → regression test.
-- Run locally before pushing: `pnpm check:versions && pnpm typecheck && pnpm -r --if-present run test && pnpm --filter "./apps/*" run build`.
+- Every PR passes the PR checks; a change in behaviour comes with a test (API: JUnit service test with the in-memory fakes + a `MockMvcTester` test in `adapter-in-web`, and a persistence test on the embedded PostgreSQL for new queries/migrations; frontend: Testing Library). Bug fix → regression test.
+- Run locally before pushing: `pnpm check:versions && pnpm typecheck && pnpm -r --if-present run test && pnpm --filter "./apps/*" run build && pnpm api:build`.
 - Docker/Dockerfile/chart changes are only verified by the `Image (*)` jobs: read their logs.
 - Never weaken a check (skip tests, relax `allowBuilds`/`minimumReleaseAge`, `--no-frozen-lockfile` in CI) silently. If it's necessary, say so explicitly and leave a dated comment to undo it.
 
 ## Dependencies and versions
 
-- Follow `toolchain-versions`: no version from memory, all pins in one commit, lockfile only via `pnpm install`.
-- Before adding a dependency: is it maintained, small, and really needed? Native modules need an `allowBuilds` entry and must build on Alpine.
+- Follow `toolchain-versions`: no version from memory, all pins in one commit, lockfile only via `pnpm install`; api versions only in `apps/api/gradle/libs.versions.toml` (Spring Boot's BOM manages the rest: don't pin a version it manages).
+- Before adding a dependency: is it maintained, small, and really needed? Native npm modules need an `allowBuilds` entry and must build on Alpine; the api image is `eclipse-temurin` Alpine, so prefer pure-Java libraries.
 - Majors are planned upgrades (read the migration guide, upgrade on a branch, verify on the target Node).
 
 ## Security

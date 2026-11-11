@@ -1,0 +1,42 @@
+# Environment variables (Helm chart, docker-compose, .env.example) override these defaults:
+#   SPRING_DATASOURCE_URL / _USERNAME / _PASSWORD, JWT_SECRET, WEB_URL, ADMIN_URL, TURNSTILE_SECRET_KEY, PORT
+spring:
+  application:
+    name: festpage-api
+  main:
+    banner-mode: off
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/festpage
+    username: festpage
+    password: festpage_dev
+    hikari:
+      # Tiny server, tiny pool.
+      maximum-pool-size: 5
+      minimum-idle: 1
+      # Fail fast instead of hanging when PostgreSQL is down (the Node api used 5s too).
+      connection-timeout: 5000 # ms
+  jpa:
+    open-in-view: false
+
+server:
+  port: ${PORT:3001}
+  shutdown: graceful
+
+festpage:
+  web:
+    # At least 32 bytes. Required: the app refuses to start without it.
+    jwt-secret: ${JWT_SECRET:}
+    token-ttl: 8h
+    cors-origins: ${WEB_URL:http://localhost:3000},${ADMIN_URL:http://localhost:3002}
+  turnstile:
+    secret-key: ${TURNSTILE_SECRET_KEY:}
+
+logging:
+  level:
+    # Hibernate warns about this on every start; the schema is Flyway's, not Hibernate's.
+    org.hibernate.orm.deprecation: error
+    # /docs is public on purpose (as with the Node api); don't warn about it on every start.
+    org.springdoc.core.events.SpringDocAppInitializer: error

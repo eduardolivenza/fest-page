@@ -7,7 +7,6 @@ dist
 *.log
 coverage
 .idea
-apps/api/src/generated
 *.tsbuildinfo
 # leftover cache from the removed Nx
 .nx

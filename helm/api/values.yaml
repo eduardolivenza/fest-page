@@ -5,9 +5,11 @@ image:
 replicas: 1
 service:
   port: 3001
+# Java/Spring Boot: ~300Mi RSS measured under load (heap capped at 60% of the limit by the image's
+# JVM flags). The request reflects that so the scheduler accounts for it; the limit is unchanged.
 resources:
   requests:
-    memory: 128Mi
+    memory: 384Mi
     cpu: 100m
   limits:
     memory: 512Mi
