@@ -1,47 +1,72 @@
-// Conventions shared by every module. Versions come from gradle/libs.versions.toml.
+// FestPage api: one Spring Boot module; the hexagonal layers are packages (see HexagonalArchitectureTest).
+// Versions come from gradle/libs.versions.toml; Spring Boot's BOM manages the rest.
 plugins {
-    alias(libs.plugins.spring.boot) apply false
+    java
+    alias(libs.plugins.spring.boot)
 }
 
-val javaVersion = libs.versions.java.get().toInt()
-val springBootBom = libs.spring.boot.bom
-val junitJupiter = libs.junit.jupiter
-val junitLauncher = libs.junit.launcher
-val assertj = libs.assertj
+group = "com.festdescans"
 
-subprojects {
-    apply(plugin = "java-library")
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInt())
+}
 
-    group = "com.festdescans"
+dependencies {
+    implementation(platform(libs.spring.boot.bom))
+    implementation(libs.spring.boot.starter.webmvc)
+    implementation(libs.spring.boot.starter.validation)
+    implementation(libs.spring.boot.starter.security)
+    implementation(libs.spring.boot.starter.oauth2.resource.server)
+    implementation(libs.spring.boot.starter.data.jpa)
+    implementation(libs.spring.boot.starter.flyway)
+    implementation(libs.spring.boot.starter.actuator)
+    implementation(libs.springdoc.webmvc.ui)
+    implementation(libs.flyway.postgresql)
+    implementation(libs.bouncycastle)
+    runtimeOnly(libs.postgresql)
 
-    extensions.configure<JavaPluginExtension> {
-        toolchain.languageVersion = JavaLanguageVersion.of(javaVersion)
+    testImplementation(platform(libs.spring.boot.bom))
+    testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.spring.boot.starter.webmvc.test)
+    testImplementation(libs.spring.boot.starter.security.test)
+    testImplementation(libs.spring.boot.starter.data.jpa.test)
+    testImplementation(libs.archunit)
+    // Real PostgreSQL (same version as production) without Docker.
+    testImplementation(libs.embedded.postgres)
+    testImplementation(platform(libs.postgres.binaries.bom))
+    testRuntimeOnly(libs.junit.launcher)
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.encoding = "UTF-8"
+    // -parameters: Spring binds @PathVariable/@RequestParam by parameter name.
+    options.compilerArgs.addAll(listOf("-parameters", "-Xlint:all,-processing,-serial", "-Werror"))
+}
+
+tasks.test {
+    useJUnitPlatform()
+    // UTC+14: a timestamp shifted by the JVM's zone fails the tests, also on UTC CI runners.
+    systemProperty("user.timezone", "Pacific/Kiritimati")
+    testLogging {
+        events("failed", "skipped")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
     }
+}
 
-    dependencies {
-        // Spring Boot's BOM manages every version not pinned in the catalog.
-        "implementation"(platform(springBootBom))
-        "testImplementation"(platform(springBootBom))
-        "testImplementation"(junitJupiter)
-        "testImplementation"(assertj)
-        "testRuntimeOnly"(junitLauncher)
-    }
+springBoot {
+    mainClass = "com.festdescans.api.FestPageApplication"
+}
 
-    tasks.withType<JavaCompile>().configureEach {
-        options.encoding = "UTF-8"
-        // -parameters: Spring binds @PathVariable/@RequestParam by parameter name.
-        options.compilerArgs.addAll(listOf("-parameters", "-Xlint:all,-processing,-serial", "-Werror"))
-    }
+tasks.bootJar {
+    archiveFileName = "app.jar"
+}
 
-    tasks.withType<Test>().configureEach {
-        useJUnitPlatform()
-        // The real-database tests start an embedded PostgreSQL; keep them in one JVM.
-        maxParallelForks = 1
-        // UTC+14: a timestamp shifted by the JVM's zone fails the tests, also on UTC CI runners.
-        systemProperty("user.timezone", "Pacific/Kiritimati")
-        testLogging {
-            events("failed", "skipped")
-            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-        }
-    }
+// Only the Boot jar is shipped.
+tasks.jar {
+    enabled = false
+}
+
+// Local dev (`./gradlew bootRun`): a dev-only JWT secret unless one is exported.
+tasks.bootRun {
+    environment("JWT_SECRET", System.getenv("JWT_SECRET") ?: "dev-only-jwt-secret-not-for-production-0123")
 }

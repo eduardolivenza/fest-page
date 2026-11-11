@@ -7,7 +7,7 @@
     "build": "pnpm --filter \"./apps/*\" run build",
     "test": "pnpm -r --if-present run test",
     "typecheck": "pnpm -r --if-present run typecheck",
-    "api:dev": "cd apps/api && ./gradlew :bootstrap:bootRun",
+    "api:dev": "cd apps/api && ./gradlew bootRun",
     "api:build": "cd apps/api && ./gradlew build",
     "check:versions": "node scripts/check-versions.mjs"
   },

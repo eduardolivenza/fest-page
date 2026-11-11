@@ -12,7 +12,7 @@ apps/
   web/      Next.js (App Router) — public site, Catalan/Spanish        → festdescans.com
   admin/    Next.js (App Router) — back office (products, orders, contacts) → admin.festdescans.com
   api/      Java + Spring Boot, hexagonal, Gradle — REST API used by web and admin → api.festdescans.com
-            (schema + Flyway migrations live in apps/api/adapter-out-persistence; dev data in apps/api/dev/seed.sql)
+            (Flyway migrations in apps/api/src/main/resources/db/migration; dev data in apps/api/dev/seed.sql)
 packages/
   types/    Shared TypeScript types (no runtime code); keep in sync with the api's response records
   ui/       Shared React components (Button, Badge, Card, ProductCard, Spinner)
@@ -28,7 +28,7 @@ Versions: never assume them, see skill `toolchain-versions` (`pnpm check:version
 | Layer | Choice |
 |---|---|
 | Frontend | Next.js (App Router, Turbopack), React 19, Tailwind CSS 4 |
-| API | Java 25, Spring Boot 4 (MVC, Security JWT resource server, Bean Validation), Argon2 (BouncyCastle); hexagonal: one Gradle module per layer |
+| API | Java 25, Spring Boot 4 (MVC, Security JWT resource server, Bean Validation), Argon2 (BouncyCastle); hexagonal: one package per layer in a single Gradle module, checked by ArchUnit |
 | Data | PostgreSQL, Spring Data JPA/Hibernate, Flyway (baselined on the former Prisma schema) |
 | Anti-spam | Cloudflare Turnstile on the contact form |
 | Tests | api: JUnit 5 + AssertJ (MockMvc with in-memory ports; real PostgreSQL via embedded binaries); web/admin: Vitest + jsdom + Testing Library |

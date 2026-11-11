@@ -27,8 +27,8 @@ Claude cannot push to main or touch the cluster: work on a branch, push it, give
 ## Docker images
 
 web/admin: multi-stage (`base` → `deps` → `builder` → `runner`), `node:<pinned>-alpine`, non-root `appuser`, `--mount=type=cache` pnpm store at `/pnpm/store`, Next standalone `server.js`.
-api: `eclipse-temurin:<pinned>-jdk-alpine` builder (`./gradlew :bootstrap:bootJar`, Gradle cache mount, no tests) → `-jre-alpine` runner with the extracted jar in `/app` (`app.jar` + `lib/`), non-root `appuser`, JVM flags in `CMD` sized for the 512Mi limit (heap 60%, SerialGC). Migrations run inside the app on startup (no initContainer). Probes: startup/liveness `/health/liveness`, readiness `/health/readiness` (Actuator). Measured: ~300Mi RSS, ~9s start on one fast core (slower on the server: the chart has a 3-minute `startupProbe`).
-Cross-stage `COPY --from=` sources must be **absolute**. Test files, `vitest.config.*` and the api's `build/`, `.gradle/`, `src/test`, `src/testFixtures` are excluded via `.dockerignore`.
+api: `eclipse-temurin:<pinned>-jdk-alpine` builder (`./gradlew bootJar`, Gradle cache mount, no tests) → `-jre-alpine` runner with the extracted jar in `/app` (`app.jar` + `lib/`), non-root `appuser`, JVM flags in `CMD` sized for the 512Mi limit (heap 60%, SerialGC). Migrations run inside the app on startup (no initContainer). Probes: startup/liveness `/health/liveness`, readiness `/health/readiness` (Actuator). Measured: ~300Mi RSS, ~9s start on one fast core (slower on the server: the chart has a 3-minute `startupProbe`).
+Cross-stage `COPY --from=` sources must be **absolute**. Test files, `vitest.config.*` and the api's `build/`, `.gradle/`, `src/test` are excluded via `.dockerignore`.
 
 ## Runtime config
 

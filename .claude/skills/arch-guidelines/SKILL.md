@@ -13,11 +13,11 @@ The server is small (3.2 GB RAM, HDD) and run by one person. Prefer **simple, bo
 |---|---|
 | New public page | `apps/web/src/app/<route>/page.tsx` (server: metadata) + `_components/<Name>Content.tsx` (client) |
 | New admin page | `apps/admin/src/app/dashboard/<route>/page.tsx` ('use client') + nav entry in `dashboard/layout.tsx` |
-| New endpoint | use case interface in `application/port/in`, logic in `application/service` (+ domain record methods), controller + request/response records in `adapter-in-web/<area>/` under `/api/...` (admin: `/api/admin/...`); new beans wired in `bootstrap/UseCaseConfiguration` |
-| New outbound dependency (DB table, external API) | port interface in `application/port/out`, implementation in an `adapter-out-*` module (new module for a new technology), in-memory fake in `application` testFixtures |
+| New endpoint | use case interface in `application/port/in`, logic in `application/service` (+ domain record methods), controller + request/response records in `adapter/in/web/<area>/` under `/api/...` (admin: `/api/admin/...`); new beans wired in `bootstrap/UseCaseConfiguration` |
+| New outbound dependency (DB table, external API) | port interface in `application/port/out`, implementation in an `adapter/out/<technology>` package, in-memory fake in `src/test/.../application/fakes` |
 | Type shared by API and frontends | `packages/types` |
 | Component used by both frontends | `packages/ui` |
-| Schema change | new `apps/api/adapter-out-persistence/src/main/resources/db/migration/V<n>__<what>.sql` + JPA entity/mapper changes |
+| Schema change | new `apps/api/src/main/resources/db/migration/V<n>__<what>.sql` + JPA entity/mapper changes |
 | User-visible text on the public site | `apps/web/src/i18n/messages.ts`, both `ca` and `es` |
 | Runtime config / secret | Helm values / SealedSecret (see `arch-delivery`), never hardcoded |
 
@@ -25,7 +25,7 @@ Don't add a new app, database, cache, queue or external SaaS without discussing 
 
 ## API
 
-- Respect the hexagon: `domain` and `application` stay framework-free (no Spring/JPA imports); adapters depend inward only, never on each other. Records for everything except JPA entities; no Lombok.
+- Respect the hexagon: `domain` and `application` stay framework-free (no Spring/JPA imports); adapters depend inward only, never on each other (`HexagonalArchitectureTest` fails otherwise). Records for everything except JPA entities; no Lombok.
 - Bean-Validate all input (request records); `{ message }` errors with the status codes in `arch-api`, thrown as domain/application exceptions and mapped in `ApiExceptionHandler` (missing row → `NotFoundException` → 404, conflicts → 409).
 - Admin endpoints live under `/api/admin/*` (protected by `SecurityConfiguration`). Public **write** endpoints need abuse protection (the `CaptchaVerifier` port, like contacts).
 - Never return secrets or password hashes; never log request bodies with personal data.
@@ -46,7 +46,7 @@ Don't add a new app, database, cache, queue or external SaaS without discussing 
 
 ## Tests and CI
 
-- Every PR passes the PR checks; a change in behaviour comes with a test (API: JUnit service test with the in-memory fakes + a `MockMvcTester` test in `adapter-in-web`, and a persistence test on the embedded PostgreSQL for new queries/migrations; frontend: Testing Library). Bug fix → regression test.
+- Every PR passes the PR checks; a change in behaviour comes with a test (API: JUnit service test with the in-memory fakes + a `MockMvcTester` test in `adapter/in/web`, and a persistence test on the embedded PostgreSQL for new queries/migrations; frontend: Testing Library). Bug fix → regression test.
 - Run locally before pushing: `pnpm check:versions && pnpm typecheck && pnpm -r --if-present run test && pnpm --filter "./apps/*" run build && pnpm api:build`.
 - Docker/Dockerfile/chart changes are only verified by the `Image (*)` jobs: read their logs.
 - Never weaken a check (skip tests, relax `allowBuilds`/`minimumReleaseAge`, `--no-frozen-lockfile` in CI) silently. If it's necessary, say so explicitly and leave a dated comment to undo it.
