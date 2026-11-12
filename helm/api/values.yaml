@@ -13,7 +13,9 @@ resources:
     cpu: 100m
   limits:
     memory: 512Mi
-    cpu: 500m
+    # The JVM needs CPU mostly while starting (class loading, JIT); at 500m it was throttled to a
+    # >3-minute start. The node has 8 cores and the api is idle afterwards.
+    cpu: 2000m
 # CORS allowed origins
 cors:
   webUrl: https://festdescans.com
