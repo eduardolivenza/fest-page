@@ -51,7 +51,7 @@ Tunnel routes in the homelab repo (`components/cloudflared/values.yaml`): `festd
 
 ## Renovate
 
-`renovate.json`: npm, Maven and Gradle-wrapper updates wait 3 days (pnpm 12 rejects packages < 1 day old); security PRs (`vulnerabilityAlerts`) wait 1 day, because Renovate's default skips the wait for them and their CI would fail the install. Spring Boot's plugin and BOM share one catalog version. `eclipse-temurin` images stay on Java 25 (LTS); the embedded test PostgreSQL never gets a major (it follows production). **Majors need approval on the Dependency Dashboard**. Merge Renovate PRs one at a time; with "branch up to date" required, Renovate rebases the next one.
+`renovate.json`: npm, Maven and Gradle-wrapper updates wait 3 days (pnpm 12 rejects packages < 1 day old); security PRs (`vulnerabilityAlerts`) wait 1 day, because Renovate's default skips the wait for them and their CI would fail the install. Until a release has reached its age, Renovate only marks its branch `renovate/stability-days: pending`; `prCreation: "not-pending"` keeps it from opening the PR before that, and `internalChecksAsSuccess: true` lets that internal check count as green (our PR checks only run on `pull_request`, so Renovate branches have no other checks). Without them a PR for a too-new package opens at once and fails `pnpm install` (PR #74, prettier 3.10.0). Spring Boot's plugin and BOM share one catalog version. `eclipse-temurin` images stay on Java 25 (LTS); the embedded test PostgreSQL never gets a major (it follows production). **Majors need approval on the Dependency Dashboard**. Merge Renovate PRs one at a time; with "branch up to date" required, Renovate rebases the next one.
 
 ## After a deploy
 

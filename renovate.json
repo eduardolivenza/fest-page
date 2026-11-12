@@ -3,6 +3,8 @@
   "extends": [
     "config:recommended"
   ],
+  "prCreation": "not-pending",
+  "internalChecksAsSuccess": true,
   "customManagers": [
     {
       "description": "pnpm installed in the Node Dockerfiles must match packageManager in package.json",
