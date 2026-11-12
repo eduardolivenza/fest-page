@@ -90,32 +90,42 @@ jobs:
     permissions:
       contents: write
     steps:
+      # The latest main, not the commit that triggered this run: other runs may have bumped tags since.
       - uses: actions/checkout@v7
         with:
+          ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
       - name: Install yq
         run: |
           sudo wget -qO /usr/local/bin/yq \
             https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
-      - name: Bump image tag
-        run: yq -i ".image.tag = \"${{ needs.version.outputs.tag }}\"" helm/admin/values.yaml
-      - name: Commit and push
+      - name: Bump image tag and push
+        env:
+          TAG: ${{ needs.version.outputs.tag }}
+          FILE: helm/admin/values.yaml
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add helm/admin/values.yaml
-          git diff --staged --quiet && echo "No changes to commit" && exit 0
-          git commit -m "ci: update admin image to ${{ needs.version.outputs.tag }} [skip ci]"
-          n=0
-          until git push; do
-            n=$((n + 1))
-            if [ "$n" -ge 5 ]; then
-              echo "Failed to push after $n attempts"
-              exit 1
+          # Every attempt starts from the latest main and re-applies the edit, so a bump pushed by another run
+          # in the meantime (same line of the same file) can never cause a conflict.
+          for attempt in 1 2 3 4 5; do
+            git fetch -q origin main
+            git reset -q --hard origin/main
+            current=$(yq '.image.tag' "$FILE")
+            # Builds can finish out of order: never replace a newer tag with an older one.
+            if [ "$current" = "$TAG" ] || [ "$(printf '%s\n%s\n' "$current" "$TAG" | sort -V | tail -1)" != "$TAG" ]; then
+              echo "$FILE already at $current (this run built $TAG): nothing to do"
+              exit 0
             fi
-            echo "Push rejected, rebasing onto latest main (attempt $n)..."
-            git fetch origin main
-            git rebase origin/main
+            yq -i ".image.tag = \"$TAG\"" "$FILE"
+            git commit -qam "ci: update admin image to $TAG [skip ci]"
+            if git push -q origin HEAD:main; then
+              echo "$FILE: $current -> $TAG"
+              exit 0
+            fi
+            echo "Push rejected (main moved), retrying ($attempt/5)..."
+            sleep "$attempt"
           done
+          echo "Failed to push after 5 attempts"
+          exit 1
