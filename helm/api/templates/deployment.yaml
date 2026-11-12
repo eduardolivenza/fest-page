@@ -79,8 +79,9 @@ spec:
             httpGet:
               path: /health/liveness
               port: {{ .Values.service.port }}
-            periodSeconds: 5
-            failureThreshold: 36 # 3 minutes
+            periodSeconds: 10
+            # 10 minutes: the first start after a deploy took >3 min on the server (HDD + low free RAM).
+            failureThreshold: 60
           readinessProbe:
             httpGet:
               path: /health/readiness
