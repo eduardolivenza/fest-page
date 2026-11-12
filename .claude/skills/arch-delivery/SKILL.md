@@ -11,6 +11,7 @@ description: How FestPage code gets from a branch to production — PR checks th
 branch → PR ──(PR checks must pass)──→ merge to main
   → ci-<app>.yml (only for paths of that app): typecheck + tests → tag <app>-vX.Y.Z → build & push ghcr.io/eduardolivenza/festpage/<app>
   → "Update image tag" job commits helm/<app>/values.yaml image.tag to main ("ci: update … [skip ci]")
+    (each attempt starts from the latest main, so concurrent merges never conflict; it never replaces a newer tag with an older one)
   → ArgoCD (homelab repo, ApplicationSet fest-descans) syncs helm/<app> → K3s namespace fest-descans
 ```
 
