@@ -1,6 +1,6 @@
 # Java 25 (LTS). Keep the Java major in sync with "java" in apps/api/gradle/libs.versions.toml and
 # `java-version` in the workflows (scripts/check-versions.mjs), and both stages on the same exact tag.
-FROM eclipse-temurin:25.0.5_8-jdk-alpine AS builder
+FROM eclipse-temurin:25.0.5.1_2-jdk-alpine AS builder
 WORKDIR /build
 COPY apps/api .
 # Tests run in CI (PR checks / ci-api.yml) against an embedded PostgreSQL; the image only needs the jar.
@@ -8,7 +8,7 @@ RUN --mount=type=cache,id=gradle,target=/root/.gradle \
     ./gradlew --no-daemon --console=plain bootJar \
  && java -Djarmode=tools -jar build/libs/app.jar extract --destination /build/extracted
 
-FROM eclipse-temurin:25.0.5_8-jre-alpine AS runner
+FROM eclipse-temurin:25.0.5.1_2-jre-alpine AS runner
 RUN addgroup -g 1001 -S app && adduser -S appuser -u 1001 -G app
 WORKDIR /app
 # Dependencies first: they change less often than the application classes.
