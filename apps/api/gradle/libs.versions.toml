@@ -3,7 +3,7 @@
 # (checked by scripts/check-versions.mjs). Never write a version from memory: see skill toolchain-versions.
 [versions]
 java = "25"
-spring-boot = "4.1.2"
+spring-boot = "4.2.0"
 springdoc = "3.2.0"
 bouncycastle = "1.87"
 embedded-postgres = "2.2.2"
