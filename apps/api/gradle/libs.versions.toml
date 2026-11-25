@@ -4,7 +4,7 @@
 [versions]
 java = "25"
 spring-boot = "4.2.0"
-springdoc = "3.2.0"
+springdoc = "3.2.1"
 bouncycastle = "1.87"
 embedded-postgres = "2.2.3"
 archunit = "1.5.1"
